@@ -3,7 +3,6 @@ extends Node3D
 @export var minimum_zoom_distance: float
 @export var maximum_zoom_distance: float
 @export var scroll_zoom_scale: float
-@export var ortho_zoom_scale: float
 @export var zoom_distance_interpolation: float
 @export var orbiting_scale: float
 @export var transition_time: float
@@ -89,9 +88,14 @@ func _handle_zooming(delta:float):
 		var zpos = lerp(camera.position.z, _zoom_distance, zoom_distance_interpolation * delta)
 		_set_camera_distance(zpos)
 
+
 func _set_camera_distance(value:float):
 	camera.position.z = value;
+	
+	# for seamless transition between persp and ortho
+	const ortho_zoom_scale = 1.5 
 	camera.size = value * ortho_zoom_scale
+
 
 func _handle_orbiting(delta:float):
 	if _orbiting:
@@ -116,11 +120,13 @@ func _fake_projection_lerp_apply(state:float, initial_zoom_distance:float):
 	camera.position.z = initial_zoom_distance + lerp(0.0, maxDist, state)
 	camera.fov = rad_to_deg(atan2(camera.size * 0.5, camera.position.z)) * 2.0
 
+
 func _initialize_or_restart_transition():
 	if _transition_tween: _transition_tween.kill()
 	_transition_tween = get_tree().create_tween()
 	_transition_tween.set_parallel(true)
 	_transitioning = true
+
 
 func transition(target_pos:Vector3, target_quat:Quaternion, projection:Camera3D.ProjectionType):
 	_initialize_or_restart_transition()

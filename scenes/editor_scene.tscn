@@ -32,7 +32,6 @@ script = ExtResource("1_h65aw")
 minimum_zoom_distance = 0.1
 maximum_zoom_distance = 10.0
 scroll_zoom_scale = 1.25
-ortho_zoom_scale = 1.5
 zoom_distance_interpolation = 20.0
 orbiting_scale = 0.25
 transition_time = 0.2
