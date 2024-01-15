@@ -27,7 +27,7 @@ transform = Transform3D(0.866025, 0.383022, -0.321394, 0, 0.642788, 0.766044, 0.
 environment = SubResource("Environment_x2nqc")
 
 [node name="orbiting_camera" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.38962e-05, 0, -0.00619364)
+transform = Transform3D(0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, -0.5, 0.5, -6.38962e-05, 0, -0.00619364)
 script = ExtResource("1_h65aw")
 minimum_zoom_distance = 0.1
 maximum_zoom_distance = 10.0

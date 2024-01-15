@@ -28,7 +28,7 @@ func _ready():
 	_fov_original = camera.fov
 
 func _input(event):
-	_input_zooming(event)
+	_input_zooming()
 	_input_orbiting(event)
 	_input_panning(event)
 	
@@ -41,7 +41,7 @@ func _input(event):
 	if Input.is_action_just_pressed("camera_snap_down"): snap(1, 0)
 
 
-func _input_zooming(event):
+func _input_zooming():
 	if _transitioning: return;
 	
 	if Input.is_action_just_released("zoom_in"):
@@ -79,8 +79,8 @@ func _input_panning(event):
 
 func _process(delta:float):
 	_handle_zooming(delta)
-	_handle_orbiting(delta)
-	_handle_panning(delta)
+	_handle_orbiting()
+	_handle_panning()
 
 
 func _handle_zooming(delta:float):
@@ -97,7 +97,7 @@ func _set_camera_distance(value:float):
 	camera.size = value * ortho_zoom_scale
 
 
-func _handle_orbiting(delta:float):
+func _handle_orbiting():
 	if _orbiting:
 		var mouse_diff = (_orbiting_current_mouse - _orbiting_initial_mouse) * orbiting_scale
 		var new_rot = _orbiting_initial_rotation + Vector3(-mouse_diff.y, -mouse_diff.x, 0.0)
@@ -106,7 +106,7 @@ func _handle_orbiting(delta:float):
 		rotation_degrees = new_rot
 
 
-func _handle_panning(delta:float):
+func _handle_panning():
 	if _panning:
 		position -= (_panning_current_mouse - _panning_initial_mouse)
 
