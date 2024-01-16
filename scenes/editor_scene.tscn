@@ -9,7 +9,6 @@
 background_mode = 1
 background_color = Color(0.0470588, 0.0117647, 0.101961, 1)
 ambient_light_color = Color(0.533333, 0.533333, 0.533333, 1)
-tonemap_mode = 3
 ssao_enabled = true
 glow_enabled = true
 

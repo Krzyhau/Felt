@@ -3,6 +3,7 @@ class_name TrixelEditor extends Node3D
 var trixels : TrixelContainer
 var trixel_materializer : TrixelMaterializer
 
+
 func _ready():
 	trixel_materializer = $trixel_materializer as TrixelMaterializer
 	
@@ -11,8 +12,9 @@ func _ready():
 	fill(Vector3i.ONE * 0, trixels.get_trixel_bounds() - Vector3i.ONE, true, false)
 	fill(Vector3i.ONE * 8, trixels.get_trixel_bounds() - Vector3i.ONE, false, false)
 	
-	_rebuild_mesh()
+	fill(Vector3i(2,0,2), Vector3i(3,16,3), false, false)
 	
+	_rebuild_mesh()
 
 func _rebuild_mesh():
 	trixel_materializer.materialize(trixels)

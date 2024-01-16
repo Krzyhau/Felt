@@ -38,7 +38,7 @@ func get_trixel(pos : Vector3i) -> bool:
 	else: return false
 	
 func get_adjacent_trixel(pos : Vector3i, face : Face) -> bool:
-	return get_trixel(pos + get_face_normal(face))
+	return get_trixel(pos + TrixelContainer.get_face_normal(face))
 
 func set_trixel(pos : Vector3i, state : bool):
 	if is_within_bounds(pos): _trixels[get_trixel_index(pos)] = state
