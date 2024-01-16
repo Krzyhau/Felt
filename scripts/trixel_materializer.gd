@@ -25,11 +25,11 @@ func _generate_mesh():
 	print("_generate_mesh() - %f ms" % worker_time)
 
 func _generate_mesh_data(mesh_arrays : Array):
-	for face in range(6):
+	for face in 6:
 		var layer_dir = TrixelContainer.get_face_normal(face).abs()
 		var layer_dir_depth = _trixels.get_trixel_width_along_axis(layer_dir)
 		
-		for layer in range(layer_dir_depth):
+		for layer in layer_dir_depth:
 			_generate_layer_mesh(mesh_arrays, face, layer)
 
 	
@@ -41,48 +41,65 @@ func _generate_layer_mesh(mesh_arrays : Array, face : TrixelContainer.Face, dept
 func _find_planes_in_layer(face : TrixelContainer.Face, depth : int) -> Array:
 	var dir_x = TrixelContainer.get_face_tangent(face).abs()
 	var dir_y = TrixelContainer.get_face_cotangent(face).abs()
+
+	var layer_size_x = _trixels.get_trixel_width_along_axis(dir_x)
+	var layer_size_y = _trixels.get_trixel_width_along_axis(dir_y)
 	
-	var layer_offset = TrixelContainer.get_face_normal(face).abs() * depth
-	var layer_size = Vector2i(
-		_trixels.get_trixel_width_along_axis(dir_x),
-		_trixels.get_trixel_width_along_axis(dir_y),
-	)
-	
-	var trixel_faces = Dictionary()
-	for x in range(layer_size.x): for y in range(layer_size.y):
-		var pos = dir_x * x + dir_y * y + layer_offset
-		if _trixels.is_trixel_face_solid(pos, face): trixel_faces[pos] = true
+	var trixel_faces = _get_trixel_faces_map(face, depth)
 	
 	var planes = []
-	while len(trixel_faces.keys()) > 0:
+	while trixel_faces.size() > 0:
 		var plane_position = trixel_faces.keys()[0]
 		trixel_faces.erase(plane_position)
-		var plane_size = Vector2i(1,1)
-		while plane_size.x < layer_size.x:
-			var face_pos = plane_position + dir_x * plane_size.x
+		var plane_x = 1
+		var plane_y = 1
+		while plane_x < layer_size_x:
+			var face_pos = plane_position + dir_x * plane_x
 			if not trixel_faces.has(face_pos): break
 			trixel_faces.erase(face_pos)
-			plane_size.x += 1
+			plane_x += 1
 		
-		while plane_size.y < layer_size.y:
-			var face_pos_y = plane_position + dir_y * plane_size.y
-			var face_positions = []
-			for x in range(plane_size.x):
-				face_positions.append(face_pos_y + dir_x * x)
-			if not trixel_faces.has_all(face_positions): break
-			for pos in face_positions: trixel_faces.erase(pos)
-			plane_size.y += 1
+		while plane_y < layer_size_y:
+			var face_pos_y = plane_position + dir_y * plane_y
+			var valid_faces = []
+			for x in plane_x:
+				var face_pos_x = face_pos_y + dir_x * x
+				if not trixel_faces.has(face_pos_x): break
+				valid_faces.append(face_pos_x)
+			if len(valid_faces) != plane_x: break
+			for face_pos_x in valid_faces: 
+				trixel_faces.erase(face_pos_x)
+			plane_y += 1
 		
 		planes.append({
 			position = plane_position,
-			size = plane_size,
+			size = Vector2i(plane_x, plane_y),
 			face = face
 		})
 	return planes
 
+func _get_trixel_faces_map(face : TrixelContainer.Face, depth : int) -> Dictionary:
+	var dir_x = TrixelContainer.get_face_tangent(face).abs()
+	var dir_y = TrixelContainer.get_face_cotangent(face).abs()
+	
+	var layer_offset = TrixelContainer.get_face_normal(face).abs() * depth
+	var layer_size_x = _trixels.get_trixel_width_along_axis(dir_x)
+	var layer_size_y = _trixels.get_trixel_width_along_axis(dir_y)
+	
+	var face_normal = TrixelContainer.get_face_normal(face)
+	
+	var trixel_faces = Dictionary()
+	
+	for x in layer_size_x: for y in layer_size_y:
+		# not isolating this vector formula improves performance by 10%
+		# no, i have no idea why. something something gdscript bad presumably
+		if _trixels.data.has(layer_offset + dir_x*x + dir_y*y) \
+		and not _trixels.data.has(layer_offset + dir_x*x + dir_y*y + face_normal):
+			trixel_faces[layer_offset + dir_x*x + dir_y*y] = true
+	return trixel_faces
+
 
 func _add_plane_to_mesh(mesh_arrays : Array, plane : Dictionary):
-	
 	var face_normal = TrixelContainer.get_face_normal(plane.face)
 	var dir_x = TrixelContainer.get_face_tangent(plane.face).abs()
 	var dir_y = TrixelContainer.get_face_cotangent(plane.face).abs()
@@ -101,7 +118,7 @@ func _add_plane_to_mesh(mesh_arrays : Array, plane : Dictionary):
 	]
 	
 	var uvs = []
-	for i in range(4): uvs.push_back(TrixelCubemap.trixel_coords_to_uv(
+	for i in 4: uvs.push_back(TrixelCubemap.trixel_coords_to_uv(
 		face_vertices[i], plane.face, _trixels.get_trixel_bounds()
 	))
 	
