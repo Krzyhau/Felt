@@ -1,7 +1,9 @@
-[gd_scene load_steps=6 format=3 uid="uid://bu7kws1bt3n66"]
+[gd_scene load_steps=8 format=3 uid="uid://bu7kws1bt3n66"]
 
 [ext_resource type="Shader" path="res://graphics/shaders/boundaries.gdshader" id="1_fbdyu"]
 [ext_resource type="Script" path="res://scripts/orbiting_camera.gd" id="1_h65aw"]
+[ext_resource type="Script" path="res://scripts/trixel_editor.gd" id="2_lpmdn"]
+[ext_resource type="Script" path="res://scripts/trixel_materializer.gd" id="4_oiibr"]
 
 [sub_resource type="Environment" id="Environment_x2nqc"]
 background_mode = 1
@@ -39,6 +41,14 @@ transition_time = 0.2
 [node name="camera3d" type="Camera3D" parent="orbiting_camera"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2)
 
-[node name="boundaries" type="MeshInstance3D" parent="."]
+[node name="trixels_editor" type="Node3D" parent="."]
+script = ExtResource("2_lpmdn")
+
+[node name="boundaries" type="MeshInstance3D" parent="trixels_editor"]
 mesh = SubResource("BoxMesh_3cab4")
+skeleton = NodePath("../..")
 surface_material_override/0 = SubResource("ShaderMaterial_5bqro")
+
+[node name="trixel_materializer" type="MeshInstance3D" parent="trixels_editor"]
+skeleton = NodePath("../..")
+script = ExtResource("4_oiibr")

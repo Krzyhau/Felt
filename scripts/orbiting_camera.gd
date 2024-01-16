@@ -1,4 +1,4 @@
-extends Node3D
+class_name OrbitingCamera extends Node3D
 
 @export var minimum_zoom_distance: float
 @export var maximum_zoom_distance: float
