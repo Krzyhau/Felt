@@ -9,7 +9,8 @@ func _ready():
 	
 	trixels = TrixelContainer.new()
 	trixels.initialize_trile()
-	fill(Vector3i.ONE * 0, trixels.get_trixel_bounds() - Vector3i.ONE, true, false)
+	fill(Vector3i.ONE, trixels.get_trixel_bounds() - Vector3i.ONE, true, false)
+	fill(Vector3i.ZERO, Vector3i(8,0,8), true, false)
 	fill(Vector3i.ONE * 8, trixels.get_trixel_bounds() - Vector3i.ONE, false, false)
 	
 	fill(Vector3i(2,0,2), Vector3i(3,16,3), false, false)
@@ -18,6 +19,11 @@ func _ready():
 
 func _rebuild_mesh():
 	trixel_materializer.materialize(trixels)
+
+
+func _process(delta):
+	if Input.is_action_just_pressed("debug_wireframe"):
+		_rebuild_mesh()
 
 
 func fill(corner1 : Vector3i, corner2 : Vector3i, state: bool, rebuild : bool = true):

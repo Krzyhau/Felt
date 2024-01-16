@@ -5,43 +5,41 @@ const DEFAULT_TRILE_SIZE = Vector3i.ONE
 
 var _trixels_per_trile : int
 var _trile_size : Vector3i
+var _trixel_bounds : Vector3i
+var _trixels_count : int
 
-var _trixels : Array
+var data : Dictionary
 
-func get_trixels_per_trile() -> int:
-	return _trixels_per_trile
-	
-func get_trile_size() -> Vector3i:
-	return _trile_size
+func initialize_data_buffer():
+	data = Dictionary()
 
-func get_trixel_bounds() -> Vector3i:
-	return _trile_size * _trixels_per_trile
-	
-func get_trixels_count() -> int:
-	var bounds = get_trixel_bounds()
-	return bounds.x * bounds.y * bounds.z
-	
-func get_trixel_index(pos : Vector3i) -> int:
-	var bounds = get_trixel_bounds()
-	return pos.x + pos.y * bounds.x + pos.z * bounds.x * bounds.y
+func _recalculate_constants():
+	_trixel_bounds = _trile_size * _trixels_per_trile
+	_trixels_count = _trixel_bounds.x * _trixel_bounds.y * _trixel_bounds.z
+
+func get_trixels_per_trile() -> int: return _trixels_per_trile
+func get_trile_size() -> Vector3i: return _trile_size
+func get_trixel_bounds() -> Vector3i: return _trixel_bounds
+func get_trixels_count() -> int: return _trixels_count
+
 
 func is_within_bounds(pos : Vector3i) -> bool:
-	var bounds = get_trixel_bounds()
-	return pos.x >= 0 and pos.x < bounds.x \
-	and pos.y >= 0 and pos.y < bounds.y \
-	and pos.z >= 0 and pos.z < bounds.z
-	
+	return pos.x >= 0 and pos.x < _trixel_bounds.x \
+	and pos.y >= 0 and pos.y < _trixel_bounds.y \
+	and pos.z >= 0 and pos.z < _trixel_bounds.z
 
 func get_trixel(pos : Vector3i) -> bool:
-	if is_within_bounds(pos):
-		return _trixels[get_trixel_index(pos)]
-	else: return false
+	return data.has(pos)
 	
 func get_adjacent_trixel(pos : Vector3i, face : Face) -> bool:
-	return get_trixel(pos + TrixelContainer.get_face_normal(face))
+	return data.has(pos + TrixelContainer.get_face_normal(face))
+
+func is_trixel_face_solid(pos : Vector3i, face : Face) -> bool:
+	return data.has(pos) and not data.has(pos + TrixelContainer.get_face_normal(face))
 
 func set_trixel(pos : Vector3i, state : bool):
-	if is_within_bounds(pos): _trixels[get_trixel_index(pos)] = state
+	if state and is_within_bounds(pos): data[pos] = true
+	if not state: data.erase(pos)
 
 func initialize_trile(
 	size : Vector3i = DEFAULT_TRILE_SIZE, 
@@ -49,39 +47,41 @@ func initialize_trile(
 ):
 	_trile_size = size
 	_trixels_per_trile = resolution
-	_trixels = []
-	_trixels.resize(get_trixels_count())
-	_trixels.fill(false)
+	_recalculate_constants()
+	initialize_data_buffer()
 
 
 enum Face {FRONT, BACK, TOP, BOTTOM, LEFT, RIGHT}
 
 static func get_face_normal(face : Face) -> Vector3i:
-	match face:
-		Face.FRONT: return Vector3i.FORWARD
-		Face.BACK: return Vector3i.BACK
-		Face.TOP: return Vector3i.UP
-		Face.BOTTOM: return Vector3i.DOWN
-		Face.LEFT: return Vector3i.LEFT
-		Face.RIGHT: return Vector3i.RIGHT
-	return Vector3i.ZERO
+	const normal_lookup = [
+		Vector3i.FORWARD, # Face.FRONT
+		Vector3i.BACK,    # Face.BACK
+		Vector3i.UP,      # Face.TOP
+		Vector3i.DOWN,    # Face.BOTTOM
+		Vector3i.LEFT,    # Face.LEFT
+		Vector3i.RIGHT    # Face.RIGHT
+	]
+	return normal_lookup[face]
 
 static func get_face_tangent(face : Face) -> Vector3i:
-	match face:
-		Face.FRONT: return Vector3i.RIGHT
-		Face.BACK: return Vector3i.LEFT
-		Face.TOP: return Vector3i.RIGHT
-		Face.BOTTOM: return Vector3i.RIGHT
-		Face.LEFT: return Vector3i.BACK
-		Face.RIGHT: return Vector3i.FORWARD
-	return Vector3i.ZERO
+	const tangent_lookup = [
+		Vector3i.RIGHT,   # Face.FRONT
+		Vector3i.LEFT,    # Face.BACK
+		Vector3i.RIGHT,   # Face.TOP
+		Vector3i.RIGHT,   # Face.BOTTOM
+		Vector3i.BACK,    # Face.LEFT
+		Vector3i.FORWARD  # Face.RIGHT
+	]
+	return tangent_lookup[face]
 	
 static func get_face_cotangent(face : Face) -> Vector3i:
-	match face:
-		Face.FRONT: return Vector3i.DOWN
-		Face.BACK: return Vector3i.DOWN
-		Face.TOP: return Vector3i.BACK
-		Face.BOTTOM: return Vector3i.FORWARD
-		Face.LEFT: return Vector3i.DOWN
-		Face.RIGHT: return Vector3i.DOWN
-	return Vector3i.ZERO
+	const cotangent_lookup = [
+		Vector3i.DOWN,    # Face.FRONT
+		Vector3i.DOWN,    # Face.BACK
+		Vector3i.BACK,    # Face.TOP
+		Vector3i.FORWARD, # Face.BOTTOM
+		Vector3i.DOWN,    # Face.LEFT
+		Vector3i.DOWN     # Face.RIGHT
+	]
+	return cotangent_lookup[face]
