@@ -119,7 +119,7 @@ func _add_plane_to_mesh(mesh_arrays : Array, plane : Dictionary):
 	
 	var uvs = []
 	for i in 4: uvs.push_back(TrixelCubemap.trixel_coords_to_uv(
-		face_vertices[i], plane.face, _trixels.get_trixel_bounds()
+		face_vertices[i], plane.face, _trixels.trixel_bounds
 	))
 	
 	# this check is a result of using abs on tangent vectors
@@ -139,5 +139,5 @@ func materialize(trixels : TrixelContainer):
 	_trixels = trixels
 	_generate_mesh()
 	
-	scale = Vector3.ONE / _trixels.get_trixels_per_trile()
-	position = _trixels.get_trile_size() * -0.5
+	scale = Vector3.ONE / _trixels.trixels_per_trile
+	position = _trixels.trile_size * -0.5

@@ -3,10 +3,10 @@ class_name TrixelContainer extends Resource
 const DEFAULT_TRIXELS_PER_TRILE = 16
 const DEFAULT_TRILE_SIZE = Vector3i.ONE
 
-var _trixels_per_trile : int
-var _trile_size : Vector3i
-var _trixel_bounds : Vector3i
-var _trixels_count : int
+var trixels_per_trile : int
+var trile_size : Vector3i
+var trixel_bounds : Vector3i
+var trixels_count : int
 
 var data : Dictionary
 
@@ -14,22 +14,17 @@ func initialize_data_buffer():
 	data = Dictionary()
 
 func _recalculate_constants():
-	_trixel_bounds = _trile_size * _trixels_per_trile
-	_trixels_count = _trixel_bounds.x * _trixel_bounds.y * _trixel_bounds.z
-
-func get_trixels_per_trile() -> int: return _trixels_per_trile
-func get_trile_size() -> Vector3i: return _trile_size
-func get_trixel_bounds() -> Vector3i: return _trixel_bounds
-func get_trixels_count() -> int: return _trixels_count
+	trixel_bounds = trile_size * trixels_per_trile
+	trixels_count = trixel_bounds.x * trixel_bounds.y * trixel_bounds.z
 
 func get_trixel_width_along_axis(axis : Vector3i) -> int:
-	var axis_size = _trixel_bounds * axis
+	var axis_size = trixel_bounds * axis
 	return abs(axis_size.x + axis_size.y + axis_size.z)
 
 func is_within_bounds(pos : Vector3i) -> bool:
-	return pos.x >= 0 and pos.x < _trixel_bounds.x \
-	and pos.y >= 0 and pos.y < _trixel_bounds.y \
-	and pos.z >= 0 and pos.z < _trixel_bounds.z
+	return pos.x >= 0 and pos.x < trixel_bounds.x \
+	and pos.y >= 0 and pos.y < trixel_bounds.y \
+	and pos.z >= 0 and pos.z < trixel_bounds.z
 
 func get_trixel(pos : Vector3i) -> bool:
 	return data.has(pos)
@@ -48,8 +43,8 @@ func initialize_trile(
 	size : Vector3i = DEFAULT_TRILE_SIZE, 
 	resolution : int = DEFAULT_TRIXELS_PER_TRILE
 ):
-	_trile_size = size
-	_trixels_per_trile = resolution
+	trile_size = size
+	trixels_per_trile = resolution
 	_recalculate_constants()
 	initialize_data_buffer()
 

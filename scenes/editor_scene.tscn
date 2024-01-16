@@ -1,16 +1,19 @@
-[gd_scene load_steps=8 format=3 uid="uid://bu7kws1bt3n66"]
+[gd_scene load_steps=11 format=3 uid="uid://bu7kws1bt3n66"]
 
 [ext_resource type="Shader" path="res://graphics/shaders/boundaries.gdshader" id="1_fbdyu"]
 [ext_resource type="Script" path="res://scripts/orbiting_camera.gd" id="1_h65aw"]
 [ext_resource type="Script" path="res://scripts/trixel_editor.gd" id="2_lpmdn"]
 [ext_resource type="Script" path="res://scripts/trixel_materializer.gd" id="4_oiibr"]
+[ext_resource type="Shader" path="res://graphics/shaders/vignette.gdshader" id="5_847bu"]
 
 [sub_resource type="Environment" id="Environment_x2nqc"]
 background_mode = 1
 background_color = Color(0.0470588, 0.0117647, 0.101961, 1)
+ambient_light_source = 2
 ambient_light_color = Color(0.533333, 0.533333, 0.533333, 1)
 ssao_enabled = true
 glow_enabled = true
+fog_light_color = Color(0.0470588, 0.0117647, 0.101961, 1)
 
 [sub_resource type="BoxMesh" id="BoxMesh_3cab4"]
 flip_faces = true
@@ -18,6 +21,14 @@ flip_faces = true
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_5bqro"]
 render_priority = 0
 shader = ExtResource("1_fbdyu")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4ue7g"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_xl74c"]
+shader = ExtResource("5_847bu")
+shader_parameter/alpha = 0.2
+shader_parameter/inner_radius = 0.405
+shader_parameter/outer_radius = 1.625
 
 [node name="editor_scene" type="Node3D"]
 
@@ -49,5 +60,14 @@ skeleton = NodePath("../..")
 surface_material_override/0 = SubResource("ShaderMaterial_5bqro")
 
 [node name="trixel_materializer" type="MeshInstance3D" parent="trixels_editor"]
+material_override = SubResource("StandardMaterial3D_4ue7g")
 skeleton = NodePath("../..")
 script = ExtResource("4_oiibr")
+
+[node name="vignette_overlay" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_xl74c")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
