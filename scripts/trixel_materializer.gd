@@ -3,22 +3,6 @@ class_name TrixelMaterializer extends MeshInstance3D
 var _trixels : TrixelContainer
 
 
-var _visited : Dictionary
-func _reload_visited_cache():
-	_visited = Dictionary()
-	
-func _has_visited(pos : Vector3i):
-	return _visited.has(pos)
-
-func _mark_face_visited(
-	dir_x : Vector3i, dir_y : Vector3i, 
-	pos : Vector3i, face: Vector2i
-):
-	for face_x in range(face.x): for face_y in range(face.y):
-		var trixel_pos = pos + dir_x * face_x + dir_y * face_y
-		if not _trixels.is_within_bounds(trixel_pos): continue
-		_visited[trixel_pos] = true
-
 
 func _generate_mesh():
 	
@@ -29,7 +13,7 @@ func _generate_mesh():
 	mesh_arrays[Mesh.ARRAY_VERTEX] = PackedVector3Array()
 	mesh_arrays[Mesh.ARRAY_TEX_UV] = PackedVector2Array()
 	mesh_arrays[Mesh.ARRAY_NORMAL] = PackedVector3Array()
-	for i in range(6): _generate_side(i, mesh_arrays)
+	_generate_mesh_data(mesh_arrays)
 	
 	mesh = ArrayMesh.new()
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, mesh_arrays)
@@ -39,55 +23,75 @@ func _generate_mesh():
 
 	
 	print("_generate_mesh() - %f ms" % worker_time)
-	
 
-func _generate_side(face : TrixelContainer.Face, mesh_arrays : Array):
+func _generate_mesh_data(mesh_arrays : Array):
+	for face in range(6):
+		var layer_dir = TrixelContainer.get_face_normal(face).abs()
+		var layer_dir_depth = _trixels.get_trixel_width_along_axis(layer_dir)
+		
+		for layer in range(layer_dir_depth):
+			_generate_layer_mesh(mesh_arrays, face, layer)
+
+	
+func _generate_layer_mesh(mesh_arrays : Array, face : TrixelContainer.Face, depth : int):
+	var planes = _find_planes_in_layer(face, depth);
+	for plane in planes: _add_plane_to_mesh(mesh_arrays, plane)
+
+
+func _find_planes_in_layer(face : TrixelContainer.Face, depth : int) -> Array:
 	var dir_x = TrixelContainer.get_face_tangent(face).abs()
 	var dir_y = TrixelContainer.get_face_cotangent(face).abs()
 	
-	_reload_visited_cache()
+	var layer_offset = TrixelContainer.get_face_normal(face).abs() * depth
+	var layer_size = Vector2i(
+		_trixels.get_trixel_width_along_axis(dir_x),
+		_trixels.get_trixel_width_along_axis(dir_y),
+	)
 	
-	var bounds = _trixels.get_trixel_bounds()
-	for x in range(bounds.x): for y in range(bounds.y): for z in range(bounds.z):
-		var pos = Vector3i(x,y,z)
-		if not _trixels.is_trixel_face_solid(pos, face) or _has_visited(pos): 
-			continue
-		
-		var face_x = _greedy_face_search(pos, face, dir_y, dir_x, 1)
-		var face_y = _greedy_face_search(pos, face, dir_x, dir_y, face_x)
-		
-		var face_size = Vector2i(face_x, face_y)
-		
-		_mark_face_visited(dir_x, dir_y, pos, face_size)
-		_add_face_to_mesh(pos, face_size, dir_x, dir_y, face, mesh_arrays)
-
-func _greedy_face_search(
-	pos : Vector3i, face : TrixelContainer.Face,
-	dir_width : Vector3i, dir_search : Vector3i,
-	width: int,
-) -> int:
-	var search_steps_limit = _trixels.get_trixels_count()
-	var search_len = 1
-	while search_len <= search_steps_limit:
-		for check_x in range(width):
-			var check_pos = pos + dir_width * check_x + dir_search * search_len
-			if not _trixels.is_trixel_face_solid(check_pos, face) or _has_visited(check_pos): 
-				return search_len
-		search_len += 1
-	return search_len
-
-
-func _add_face_to_mesh(
-	pos : Vector3i, face_size: Vector2i, 
-	dir_x : Vector3i, dir_y : Vector3i, 
-	face : TrixelContainer.Face,
-	mesh_arrays : Array
-):
-	var face_normal = TrixelContainer.get_face_normal(face)
+	var trixel_faces = Dictionary()
+	for x in range(layer_size.x): for y in range(layer_size.y):
+		var pos = dir_x * x + dir_y * y + layer_offset
+		if _trixels.is_trixel_face_solid(pos, face): trixel_faces[pos] = true
 	
-	var face_corner = pos as Vector3 + (Vector3i.ONE + face_normal - (dir_x + dir_y)) * 0.5
-	var face_offset_x = (dir_x * face_size.x) as Vector3
-	var face_offset_y = (dir_y * face_size.y) as Vector3
+	var planes = []
+	while len(trixel_faces.keys()) > 0:
+		var plane_position = trixel_faces.keys()[0]
+		trixel_faces.erase(plane_position)
+		var plane_size = Vector2i(1,1)
+		while plane_size.x < layer_size.x:
+			var face_pos = plane_position + dir_x * plane_size.x
+			if not trixel_faces.has(face_pos): break
+			trixel_faces.erase(face_pos)
+			plane_size.x += 1
+		
+		while plane_size.y < layer_size.y:
+			var face_pos_y = plane_position + dir_y * plane_size.y
+			var face_positions = []
+			for x in range(plane_size.x):
+				face_positions.append(face_pos_y + dir_x * x)
+			if not trixel_faces.has_all(face_positions): break
+			for pos in face_positions: trixel_faces.erase(pos)
+			plane_size.y += 1
+		
+		planes.append({
+			position = plane_position,
+			size = plane_size,
+			face = face
+		})
+	return planes
+
+
+func _add_plane_to_mesh(mesh_arrays : Array, plane : Dictionary):
+	
+	var face_normal = TrixelContainer.get_face_normal(plane.face)
+	var dir_x = TrixelContainer.get_face_tangent(plane.face).abs()
+	var dir_y = TrixelContainer.get_face_cotangent(plane.face).abs()
+	
+	var pos = plane.position as Vector3
+	
+	var face_corner = pos + (Vector3i.ONE + face_normal - (dir_x + dir_y)) * 0.5
+	var face_offset_x = (dir_x * plane.size.x) as Vector3
+	var face_offset_y = (dir_y * plane.size.y) as Vector3
 	
 	var face_vertices = [
 		face_corner,
@@ -98,7 +102,7 @@ func _add_face_to_mesh(
 	
 	var uvs = []
 	for i in range(4): uvs.push_back(TrixelCubemap.trixel_coords_to_uv(
-		face_vertices[i], face, _trixels.get_trixel_bounds()
+		face_vertices[i], plane.face, _trixels.get_trixel_bounds()
 	))
 	
 	# this check is a result of using abs on tangent vectors

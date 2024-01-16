@@ -9,6 +9,7 @@ func _ready():
 	
 	trixels = TrixelContainer.new()
 	trixels.initialize_trile()
+	#fill(Vector3i.ZERO, trixels.get_trixel_bounds() - Vector3i.ONE, true, false)
 	fill(Vector3i.ONE, trixels.get_trixel_bounds() - Vector3i.ONE, true, false)
 	fill(Vector3i.ZERO, Vector3i(8,0,8), true, false)
 	fill(Vector3i.ONE * 8, trixels.get_trixel_bounds() - Vector3i.ONE, false, false)

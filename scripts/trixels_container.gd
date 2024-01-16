@@ -22,6 +22,9 @@ func get_trile_size() -> Vector3i: return _trile_size
 func get_trixel_bounds() -> Vector3i: return _trixel_bounds
 func get_trixels_count() -> int: return _trixels_count
 
+func get_trixel_width_along_axis(axis : Vector3i) -> int:
+	var axis_size = _trixel_bounds * axis
+	return abs(axis_size.x + axis_size.y + axis_size.z)
 
 func is_within_bounds(pos : Vector3i) -> bool:
 	return pos.x >= 0 and pos.x < _trixel_bounds.x \
