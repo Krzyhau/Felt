@@ -36,9 +36,24 @@ func is_trixel_face_solid(pos : Vector3i, face : Face) -> bool:
 	return data.has(pos) and not data.has(pos + TrixelContainer.get_face_normal(face))
 
 func set_trixel(pos : Vector3i, state : bool):
-	if state and is_within_bounds(pos): data[pos] = true
+	if state:
+		if pos.x >= 0 and pos.x < trixel_bounds.x \
+		and pos.y >= 0 and pos.y < trixel_bounds.y \
+		and pos.z >= 0 and pos.z < trixel_bounds.z :
+			data[pos] = true
 	if not state: data.erase(pos)
-
+	
+func set_trixels(positions : Array, state : bool):
+	if state:
+		for pos in positions:
+			if pos.x >= 0 and pos.x < trixel_bounds.x \
+			and pos.y >= 0 and pos.y < trixel_bounds.y \
+			and pos.z >= 0 and pos.z < trixel_bounds.z :
+				data[pos] = true
+	if not state:
+		for pos in positions:
+			data.erase(pos)
+				
 func initialize_trile(
 	size : Vector3i = DEFAULT_TRILE_SIZE, 
 	resolution : int = DEFAULT_TRIXELS_PER_TRILE

@@ -8,10 +8,17 @@ func _ready():
 	trixel_materializer = $trixel_materializer as TrixelMaterializer
 	boundaries_object = $boundaries
 	
+	var start = Time.get_ticks_usec()
+	
 	trixels = TrixelContainer.new()
-	trixels.initialize_trile()
+	trixels.initialize_trile(Vector3i(4,4,4))
+	
 	fill(Vector3i.ZERO, trixels.trixel_bounds - Vector3i.ONE, true, false)
-	fill(Vector3i(8,8,0), trixels.trixel_bounds - Vector3i.ONE, false, false)
+	
+	var end = Time.get_ticks_usec()
+	var worker_time = (end-start)/1000.0
+	print("TrixelEditor._ready() - %f ms" % worker_time)
+	
 	_rebuild_mesh()
 
 func _rebuild_mesh():
@@ -36,10 +43,13 @@ func fill(corner1 : Vector3i, corner2 : Vector3i, state: bool, rebuild : bool = 
 		max(corner1.z, corner2.z),
 	)
 	
+	var trixels_to_fill = []
+	
 	for x in range(smallest.x, largest.x+1):
 		for y in range(smallest.y, largest.y+1):
 			for z in range(smallest.z, largest.z+1):
-				var pos = Vector3i(x,y,z)
-				trixels.set_trixel(pos, state)
+				trixels_to_fill.append(Vector3i(x,y,z))
+	
+	trixels.set_trixels(trixels_to_fill, state)
 	
 	if rebuild: _rebuild_mesh()

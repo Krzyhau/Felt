@@ -2,7 +2,9 @@ class_name TrixelMaterializer extends MeshInstance3D
 
 var _trixels : TrixelContainer
 
-
+var _trixel_layer_lookup_x : Array
+var _trixel_layer_lookup_y : Array
+var _trixel_layer_lookup_z : Array
 
 func _generate_mesh():
 	
@@ -20,11 +22,11 @@ func _generate_mesh():
 
 	var end = Time.get_ticks_usec()
 	var worker_time = (end-start)/1000.0
-
-	
 	print("_generate_mesh() - %f ms" % worker_time)
 
 func _generate_mesh_data(mesh_arrays : Array):
+	_generate_trixel_layers_lookup()
+	
 	for face in 6:
 		var layer_dir = TrixelContainer.get_face_normal(face).abs()
 		var layer_dir_depth = _trixels.get_trixel_width_along_axis(layer_dir)
@@ -55,18 +57,21 @@ func _find_planes_in_layer(face : TrixelContainer.Face, depth : int) -> Array:
 		var plane_y = 1
 		while plane_x < layer_size_x:
 			var face_pos = plane_position + dir_x * plane_x
-			if not trixel_faces.has(face_pos): break
-			trixel_faces.erase(face_pos)
-			plane_x += 1
+			if trixel_faces.has(face_pos):
+				trixel_faces.erase(face_pos)
+				plane_x += 1
+			else: break
 		
 		while plane_y < layer_size_y:
 			var face_pos_y = plane_position + dir_y * plane_y
 			var valid_faces = []
 			for x in plane_x:
 				var face_pos_x = face_pos_y + dir_x * x
-				if not trixel_faces.has(face_pos_x): break
-				valid_faces.append(face_pos_x)
-			if len(valid_faces) != plane_x: break
+				if trixel_faces.has(face_pos_x):
+					valid_faces.append(face_pos_x)
+				else: break
+			if len(valid_faces) != plane_x: 
+				break
 			for face_pos_x in valid_faces: 
 				trixel_faces.erase(face_pos_x)
 			plane_y += 1
@@ -79,24 +84,43 @@ func _find_planes_in_layer(face : TrixelContainer.Face, depth : int) -> Array:
 	return planes
 
 func _get_trixel_faces_map(face : TrixelContainer.Face, depth : int) -> Dictionary:
-	var dir_x = TrixelContainer.get_face_tangent(face).abs()
-	var dir_y = TrixelContainer.get_face_cotangent(face).abs()
-	
-	var layer_offset = TrixelContainer.get_face_normal(face).abs() * depth
-	var layer_size_x = _trixels.get_trixel_width_along_axis(dir_x)
-	var layer_size_y = _trixels.get_trixel_width_along_axis(dir_y)
-	
 	var face_normal = TrixelContainer.get_face_normal(face)
+	var depth_top = depth + (face_normal.x + face_normal.y + face_normal.z)
+	var max_depth = _trixels.get_trixel_width_along_axis(face_normal) - 1
+	var has_top = depth_top >= 0 and depth_top <= max_depth
+
+	var trixel_layer_lookup : Array
+	if face_normal.x != 0: trixel_layer_lookup = _trixel_layer_lookup_x
+	elif face_normal.y != 0: trixel_layer_lookup = _trixel_layer_lookup_y
+	elif face_normal.z != 0: trixel_layer_lookup = _trixel_layer_lookup_z
+		
+	var trixel_main_layer = trixel_layer_lookup[depth]
+	if not has_top: return Dictionary(trixel_main_layer)
+	
+	var trixel_top_layer =  trixel_layer_lookup[depth_top]
 	
 	var trixel_faces = Dictionary()
 	
-	for x in layer_size_x: for y in layer_size_y:
-		# not isolating this vector formula improves performance by 10%
-		# no, i have no idea why. something something gdscript bad presumably
-		if _trixels.data.has(layer_offset + dir_x*x + dir_y*y) \
-		and not _trixels.data.has(layer_offset + dir_x*x + dir_y*y + face_normal):
-			trixel_faces[layer_offset + dir_x*x + dir_y*y] = true
+	for pos in trixel_main_layer:
+		if not trixel_top_layer.has(pos + face_normal): trixel_faces[pos] = true
+		
 	return trixel_faces
+
+func _generate_trixel_layers_lookup():
+	_trixel_layer_lookup_x = []
+	_trixel_layer_lookup_y = []
+	_trixel_layer_lookup_z = []
+	
+	var bounds = _trixels.trixel_bounds
+	
+	for x in bounds.x: _trixel_layer_lookup_x.append(Dictionary())
+	for y in bounds.y: _trixel_layer_lookup_y.append(Dictionary())
+	for z in bounds.z: _trixel_layer_lookup_z.append(Dictionary())
+	
+	for pos in _trixels.data:
+		_trixel_layer_lookup_x[pos.x][pos] = true
+		_trixel_layer_lookup_y[pos.y][pos] = true
+		_trixel_layer_lookup_z[pos.z][pos] = true
 
 
 func _add_plane_to_mesh(mesh_arrays : Array, plane : Dictionary):

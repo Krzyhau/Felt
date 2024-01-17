@@ -61,7 +61,6 @@ surface_material_override/0 = SubResource("ShaderMaterial_5bqro")
 
 [node name="trixel_materializer" type="MeshInstance3D" parent="trixels_editor"]
 material_override = SubResource("StandardMaterial3D_4ue7g")
-skeleton = NodePath("../..")
 script = ExtResource("4_oiibr")
 
 [node name="vignette_overlay" type="ColorRect" parent="."]
