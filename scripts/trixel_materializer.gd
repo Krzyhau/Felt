@@ -2,8 +2,6 @@ class_name TrixelMaterializer extends MeshInstance3D
 
 var _trixels : TrixelContainer
 
-var _trixel_layer_lookup : Array
-
 func _generate_mesh():
 	
 	var start = Time.get_ticks_usec()
@@ -23,8 +21,6 @@ func _generate_mesh():
 	print("_generate_mesh() - %f ms" % worker_time)
 
 func _generate_mesh_data(mesh_arrays : Array):
-	_generate_trixel_layers_lookup()
-	
 	for face in 6:
 		var layer_dir = TrixelContainer.get_face_normal(face).abs()
 		var layer_dir_depth = _trixels.get_trixel_width_along_axis(layer_dir)
@@ -32,7 +28,7 @@ func _generate_mesh_data(mesh_arrays : Array):
 		for layer in layer_dir_depth:
 			_generate_layer_mesh(mesh_arrays, face, layer)
 
-	
+
 func _generate_layer_mesh(mesh_arrays : Array, face : TrixelContainer.Face, depth : int):
 	var planes = _find_planes_in_layer(face, depth);
 	for plane in planes: _add_plane_to_mesh(mesh_arrays, plane)
@@ -82,58 +78,40 @@ func _find_planes_in_layer(face : TrixelContainer.Face, depth : int) -> Array:
 	return planes
 
 func _get_trixel_faces_map(face : TrixelContainer.Face, depth : int) -> Dictionary:
-	var dir_x = TrixelContainer.get_face_tangent(face)
-	var dir_y = TrixelContainer.get_face_cotangent(face)
-	var dir_z = TrixelContainer.get_face_normal(face)
+	var dir_x = TrixelContainer.get_face_tangent(face).abs()
+	var dir_y = TrixelContainer.get_face_cotangent(face).abs()
+	var dir_z = TrixelContainer.get_face_normal(face).abs()
 
 	var layer_size_x = _trixels.get_trixel_width_along_axis(dir_x)
 	var layer_size_y = _trixels.get_trixel_width_along_axis(dir_y)
 	var layer_size_z = _trixels.get_trixel_width_along_axis(dir_z)
 
-	var depth_offset = (dir_z.x + dir_z.y + dir_z.z)
-	var has_top = depth + 1 < layer_size_z
+	var x_index = 1 if dir_x.x else _trixels.y_index if dir_x.y else _trixels.z_index
+	var y_index = 1 if dir_y.x else _trixels.y_index if dir_y.y else _trixels.z_index
+	var z_index = 1 if dir_z.x else _trixels.y_index if dir_z.y else _trixels.z_index
 
-	var bounds = _trixels.trixel_bounds
-	var global_y_scale = bounds.x
-	var global_z_scale = bounds.x * bounds.y
+	var face_normal = TrixelContainer.get_face_normal(face)
+	var depth_offset = (face_normal.x + face_normal.y + face_normal.z)
+	var abs_depth = depth if depth_offset > 0 else layer_size_z - 1 - depth
+	var z_offset = abs_depth * z_index
 	
-	var x_scale = 1
-	if dir_x.y != 0: x_scale = global_y_scale
-	elif dir_x.z != 0: x_scale = global_z_scale
-	
-	var y_scale = 1
-	if dir_y.y != 0: y_scale = global_y_scale
-	elif dir_y.z != 0: y_scale = global_z_scale
-	
-	var z_scale = 1
-	if dir_z.y != 0: z_scale = global_y_scale
-	elif dir_z.z != 0: z_scale = global_z_scale
-
-	var z_offset = depth if depth_offset > 0 else layer_size_z - 1 - depth
-	z_offset *= z_scale
-	
-	var z_top_offset = z_offset + depth_offset * z_scale
+	var z_top_offset = z_offset + depth_offset * z_index
 
 	var trixel_faces = Dictionary()
 	
-	for x in layer_size_x: for y in layer_size_y:
-		var pos = _trixel_layer_lookup[x*x_scale + y*y_scale + z_offset]
-		if pos and not (has_top and _trixel_layer_lookup[x*x_scale + y*y_scale + z_top_offset]):
-			trixel_faces[pos] = true
+	# throwing these variables to have the least stuff possible within the loop.
+	# apparently godot hates having stuff in a loop in terms of performance
+	var buffer = _trixels.buffer
+	var has_top = depth + 1 < layer_size_z
+	var face_z_comp = dir_z * abs_depth
+	var range_x = range(0, layer_size_x * x_index, x_index)
+	var range_y = range(0, layer_size_y * y_index, y_index)
+	
+	for x in range_x: for y in range_y:
+		if buffer[x + y + z_offset] and not (has_top and buffer[x + y + z_top_offset]):
+			trixel_faces[x * dir_x / x_index + y * dir_y / y_index + face_z_comp] = true
 		
 	return trixel_faces
-
-func _generate_trixel_layers_lookup():
-	var bounds = _trixels.trixel_bounds
-	
-	_trixel_layer_lookup = []
-	_trixel_layer_lookup.resize(_trixels.trixels_count)
-	
-	var y_scale = bounds.x
-	var z_scale = bounds.x * bounds.y
-	
-	for pos in _trixels.data:
-		_trixel_layer_lookup[pos.x + pos.y*y_scale + pos.z*z_scale] = pos
 
 
 func _add_plane_to_mesh(mesh_arrays : Array, plane : Dictionary):

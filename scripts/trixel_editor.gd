@@ -45,13 +45,6 @@ func fill(corner1 : Vector3i, corner2 : Vector3i, state: bool, rebuild : bool = 
 		max(corner1.z, corner2.z),
 	)
 	
-	var trixels_to_fill = []
-	
-	for x in range(smallest.x, largest.x+1):
-		for y in range(smallest.y, largest.y+1):
-			for z in range(smallest.z, largest.z+1):
-				trixels_to_fill.append(Vector3i(x,y,z))
-	
-	trixels.set_trixels(trixels_to_fill, state)
+	trixels.fill_trixels(smallest, largest, state)
 	
 	if rebuild: _rebuild_mesh()
