@@ -14,6 +14,8 @@ func _ready():
 	trixels.initialize_trile(Vector3i(4,4,4))
 	
 	fill(Vector3i.ZERO, trixels.trixel_bounds - Vector3i.ONE, true, false)
+	#fill(Vector3i(8,8,0), trixels.trixel_bounds - Vector3i.ONE, false, false)
+	#fill(Vector3i(16,0,16), Vector3i(20,21,20), false, false)
 	
 	var end = Time.get_ticks_usec()
 	var worker_time = (end-start)/1000.0

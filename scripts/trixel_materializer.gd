@@ -2,9 +2,7 @@ class_name TrixelMaterializer extends MeshInstance3D
 
 var _trixels : TrixelContainer
 
-var _trixel_layer_lookup_x : Array
-var _trixel_layer_lookup_y : Array
-var _trixel_layer_lookup_z : Array
+var _trixel_layer_lookup : Array
 
 func _generate_mesh():
 	
@@ -84,43 +82,58 @@ func _find_planes_in_layer(face : TrixelContainer.Face, depth : int) -> Array:
 	return planes
 
 func _get_trixel_faces_map(face : TrixelContainer.Face, depth : int) -> Dictionary:
-	var face_normal = TrixelContainer.get_face_normal(face)
-	var depth_top = depth + (face_normal.x + face_normal.y + face_normal.z)
-	var max_depth = _trixels.get_trixel_width_along_axis(face_normal) - 1
-	var has_top = depth_top >= 0 and depth_top <= max_depth
+	var dir_x = TrixelContainer.get_face_tangent(face)
+	var dir_y = TrixelContainer.get_face_cotangent(face)
+	var dir_z = TrixelContainer.get_face_normal(face)
 
-	var trixel_layer_lookup : Array
-	if face_normal.x != 0: trixel_layer_lookup = _trixel_layer_lookup_x
-	elif face_normal.y != 0: trixel_layer_lookup = _trixel_layer_lookup_y
-	elif face_normal.z != 0: trixel_layer_lookup = _trixel_layer_lookup_z
-		
-	var trixel_main_layer = trixel_layer_lookup[depth]
-	if not has_top: return Dictionary(trixel_main_layer)
+	var layer_size_x = _trixels.get_trixel_width_along_axis(dir_x)
+	var layer_size_y = _trixels.get_trixel_width_along_axis(dir_y)
+	var layer_size_z = _trixels.get_trixel_width_along_axis(dir_z)
+
+	var depth_offset = (dir_z.x + dir_z.y + dir_z.z)
+	var has_top = depth + 1 < layer_size_z
+
+	var bounds = _trixels.trixel_bounds
+	var global_y_scale = bounds.x
+	var global_z_scale = bounds.x * bounds.y
 	
-	var trixel_top_layer =  trixel_layer_lookup[depth_top]
+	var x_scale = 1
+	if dir_x.y != 0: x_scale = global_y_scale
+	elif dir_x.z != 0: x_scale = global_z_scale
 	
+	var y_scale = 1
+	if dir_y.y != 0: y_scale = global_y_scale
+	elif dir_y.z != 0: y_scale = global_z_scale
+	
+	var z_scale = 1
+	if dir_z.y != 0: z_scale = global_y_scale
+	elif dir_z.z != 0: z_scale = global_z_scale
+
+	var z_offset = depth if depth_offset > 0 else layer_size_z - 1 - depth
+	z_offset *= z_scale
+	
+	var z_top_offset = z_offset + depth_offset * z_scale
+
 	var trixel_faces = Dictionary()
 	
-	for pos in trixel_main_layer:
-		if not trixel_top_layer.has(pos + face_normal): trixel_faces[pos] = true
+	for x in layer_size_x: for y in layer_size_y:
+		var pos = _trixel_layer_lookup[x*x_scale + y*y_scale + z_offset]
+		if pos and not (has_top and _trixel_layer_lookup[x*x_scale + y*y_scale + z_top_offset]):
+			trixel_faces[pos] = true
 		
 	return trixel_faces
 
 func _generate_trixel_layers_lookup():
-	_trixel_layer_lookup_x = []
-	_trixel_layer_lookup_y = []
-	_trixel_layer_lookup_z = []
-	
 	var bounds = _trixels.trixel_bounds
 	
-	for x in bounds.x: _trixel_layer_lookup_x.append(Dictionary())
-	for y in bounds.y: _trixel_layer_lookup_y.append(Dictionary())
-	for z in bounds.z: _trixel_layer_lookup_z.append(Dictionary())
+	_trixel_layer_lookup = []
+	_trixel_layer_lookup.resize(_trixels.trixels_count)
+	
+	var y_scale = bounds.x
+	var z_scale = bounds.x * bounds.y
 	
 	for pos in _trixels.data:
-		_trixel_layer_lookup_x[pos.x][pos] = true
-		_trixel_layer_lookup_y[pos.y][pos] = true
-		_trixel_layer_lookup_z[pos.z][pos] = true
+		_trixel_layer_lookup[pos.x + pos.y*y_scale + pos.z*z_scale] = pos
 
 
 func _add_plane_to_mesh(mesh_arrays : Array, plane : Dictionary):
