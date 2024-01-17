@@ -63,7 +63,7 @@ mesh = SubResource("BoxMesh_3cab4")
 skeleton = NodePath("../..")
 surface_material_override/0 = SubResource("ShaderMaterial_5bqro")
 
-[node name="trixel_materializer" type="MeshInstance3D" parent="trixels_editor"]
+[node name="trixel_materializer" type="CSGMesh3D" parent="trixels_editor"]
 material_override = SubResource("StandardMaterial3D_4ue7g")
 script = ExtResource("4_oiibr")
 

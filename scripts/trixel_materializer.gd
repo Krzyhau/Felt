@@ -1,24 +1,44 @@
-class_name TrixelMaterializer extends MeshInstance3D
+class_name TrixelMaterializer extends CSGMesh3D
+
+signal materialized(trixels : TrixelContainer, interrupted : bool)
+
+var _generation_thread : Thread
+var _generation_mutex : Mutex = Mutex.new()
+var _generation_stopped: bool = false
+
+var mesh_data : Array
 
 var _trixels : TrixelContainer
 
+
 func _generate_mesh():
-	
 	var start = Time.get_ticks_usec()
 	
-	var mesh_arrays = []
-	mesh_arrays.resize(Mesh.ARRAY_MAX)
-	mesh_arrays[Mesh.ARRAY_VERTEX] = PackedVector3Array()
-	mesh_arrays[Mesh.ARRAY_TEX_UV] = PackedVector2Array()
-	mesh_arrays[Mesh.ARRAY_NORMAL] = PackedVector3Array()
-	_generate_mesh_data(mesh_arrays)
+	mesh_data = []
+	mesh_data.resize(Mesh.ARRAY_MAX)
+	mesh_data[Mesh.ARRAY_VERTEX] = PackedVector3Array()
+	mesh_data[Mesh.ARRAY_TEX_UV] = PackedVector2Array()
+	mesh_data[Mesh.ARRAY_INDEX] = PackedInt32Array()
 	
-	mesh = ArrayMesh.new()
-	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, mesh_arrays)
+	_generate_mesh_data(mesh_data)
+	
+	_generation_mutex.lock()
+	var should_stop = _generation_stopped
+	_generation_mutex.unlock()
+	if should_stop: 
+		print("_generate_mesh() - interrupted")
+	else:
+		var end = Time.get_ticks_usec()
+		var worker_time = (end-start)/1000.0
+		print("_generate_mesh() - %f ms" % worker_time)
+	
+	call_deferred("_on_materialized", should_stop)
 
-	var end = Time.get_ticks_usec()
-	var worker_time = (end-start)/1000.0
-	print("_generate_mesh() - %f ms" % worker_time)
+func _on_materialized(interrupted : bool):
+	if not interrupted:
+		mesh = ArrayMesh.new()
+		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, mesh_data)
+	materialized.emit(_trixels, interrupted)
 
 func _generate_mesh_data(mesh_arrays : Array):
 	for face in 6:
@@ -27,6 +47,11 @@ func _generate_mesh_data(mesh_arrays : Array):
 		
 		for layer in layer_dir_depth:
 			_generate_layer_mesh(mesh_arrays, face, layer)
+			
+			_generation_mutex.lock()
+			var should_stop = _generation_stopped
+			_generation_mutex.unlock()
+			if should_stop: return
 
 
 func _generate_layer_mesh(mesh_arrays : Array, face : TrixelContainer.Face, depth : int):
@@ -145,14 +170,31 @@ func _add_plane_to_mesh(mesh_arrays : Array, plane : Dictionary):
 	var indices = indices_clockwise if use_clockwise else indices_counter_clockwise
 	
 	for i in indices:
-		mesh_arrays[Mesh.ARRAY_VERTEX].push_back(face_vertices[i])
-		mesh_arrays[Mesh.ARRAY_NORMAL].push_back(face_normal)
-		mesh_arrays[Mesh.ARRAY_TEX_UV].push_back(uvs[i])
-
+		var mesh_index = mesh_arrays[Mesh.ARRAY_VERTEX].rfind(face_vertices[i])
+		if mesh_index < 0:
+			mesh_index = len(mesh_arrays[Mesh.ARRAY_VERTEX])
+			mesh_arrays[Mesh.ARRAY_VERTEX].push_back(face_vertices[i])
+			mesh_arrays[Mesh.ARRAY_TEX_UV].push_back(uvs[i])
+		mesh_arrays[Mesh.ARRAY_INDEX].push_back(mesh_index)
 
 func materialize(trixels : TrixelContainer):
 	_trixels = trixels
-	_generate_mesh()
-	
 	scale = Vector3.ONE / _trixels.trixels_per_trile
 	position = _trixels.trile_size * -0.5
+	
+	interrupt_if_active()
+	
+	_generation_stopped = false
+	_generation_thread = Thread.new()
+	_generation_thread.start(_generate_mesh)
+
+func interrupt_if_active():
+	if _generation_thread:
+		_generation_mutex.lock()
+		_generation_stopped = true
+		_generation_mutex.unlock()
+		_generation_thread.wait_to_finish()
+
+func is_materializing() -> bool:
+	return _generation_thread and _generation_thread.is_alive()
+
