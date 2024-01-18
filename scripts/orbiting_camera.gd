@@ -11,8 +11,8 @@ var _zoom_distance : float
 var _orbiting : bool
 var _panning : bool
 var _transitioning : bool
-var _panning_initial_mouse : Vector3
-var _panning_current_mouse : Vector3
+var _panning_initial_mouse : Vector2
+var _panning_current_mouse : Vector2
 var _orbiting_initial_mouse : Vector2
 var _orbiting_current_mouse: Vector2
 var _orbiting_initial_rotation : Vector3
@@ -64,16 +64,13 @@ func _input_orbiting(event):
 
 
 func _input_panning(event):
-	if not event is InputEventMouse: return
-	
-	var pan_pos = camera.project_position(event.position, _zoom_distance)
-	
 	if event is InputEventMouseButton:
 		if event.button_index != 3: return
 		_panning = event.pressed
-		_panning_initial_mouse = pan_pos
-	if _panning:
-		_panning_current_mouse = pan_pos
+		_panning_initial_mouse = event.position
+		_panning_current_mouse = event.position
+	if  event is InputEventMouseMotion and _panning:
+		_panning_current_mouse = event.position
 
 
 
@@ -108,7 +105,11 @@ func _handle_orbiting():
 
 func _handle_panning():
 	if _panning:
-		position -= (_panning_current_mouse - _panning_initial_mouse)
+		var pan_initial = camera.project_position(_panning_initial_mouse, camera.position.z)
+		var pan_current = camera.project_position(_panning_current_mouse, camera.position.z)
+		
+		position -= (pan_current - pan_initial)
+		_panning_initial_mouse = _panning_current_mouse
 
 
 func _fake_projection_lerp_apply(state:float, initial_zoom_distance:float):
