@@ -11,10 +11,10 @@ func _ready():
 	trixel_materializer.materialized.connect(_trixel_materialized)
 	boundaries_object = $boundaries
 	
-	var start = Time.get_ticks_usec()
+	var start := Time.get_ticks_usec()
 	
 	trixels = TrixelContainer.new()
-	trixels.initialize_trile()
+	trixels.initialize_trile(Vector3i(4,4,4))
 	fill(Vector3i.ZERO, trixels.trixel_bounds - Vector3i.ONE, true)
 	
 	var end = Time.get_ticks_usec()
@@ -55,21 +55,21 @@ func _trixel_materialized(_trixels : TrixelContainer, interrupted : bool):
 		_clear_csg_fillers()
 
 func _create_csg_filler(mins : Vector3, maxs : Vector3, state : bool):
-	var box = CSGBox3D.new()
+	var box := CSGBox3D.new()
 	
-	var trixels_per_trile = trixels.trixels_per_trile
-	var trile_size = trixels.trile_size as Vector3
-	var trixel_bounds = trixels.trixel_bounds as Vector3
+	var trixels_per_trile := trixels.trixels_per_trile
+	var trile_size := trixels.trile_size as Vector3
+	var trixel_bounds := trixels.trixel_bounds as Vector3
 	
-	var region_size = (maxs - mins + Vector3.ONE)
-	var region_midpoint = (mins + maxs + Vector3.ONE) * 0.5
+	var region_size := (maxs - mins + Vector3.ONE)
+	var region_midpoint := (mins + maxs + Vector3.ONE) * 0.5
 	
 	box.scale = region_size / trixels_per_trile
 	box.position = region_midpoint / trixels_per_trile - trile_size * 0.5
 	
 	box.operation = CSGShape3D.OPERATION_UNION if state else CSGShape3D.OPERATION_SUBTRACTION
 	
-	var material = trixel_materializer.material.duplicate(true) as ShaderMaterial
+	var material := trixel_materializer.material.duplicate(true) as ShaderMaterial
 	material.set_shader_parameter("calculate_projection", true)
 	material.set_shader_parameter("inner_faces", not state)
 	material.set_shader_parameter("size", region_size / trixel_bounds)
@@ -85,12 +85,12 @@ func _clear_csg_fillers():
 	temporary_csg_fillers.clear()
 
 func fill(corner1 : Vector3i, corner2 : Vector3i, state: bool):
-	var smallest = Vector3i(
+	var smallest := Vector3i(
 		min(corner1.x, corner2.x),
 		min(corner1.y, corner2.y),
 		min(corner1.z, corner2.z),
 	)
-	var largest = Vector3i(
+	var largest := Vector3i(
 		max(corner1.x, corner2.x),
 		max(corner1.y, corner2.y),
 		max(corner1.z, corner2.z),

@@ -23,7 +23,7 @@ static func trixel_coords_to_uv(
 	return Vector2((x_coord + texture_offset_x) / 6.0, y_coord)
 
 static func get_face_texture_x_offset(face : TrixelContainer.Face) -> int:
-	const offset_lookup = [
+	const offset_lookup := [
 		0,  # Face.FRONT
 		3,  # Face.BACK
 		4,  # Face.TOP
@@ -34,7 +34,7 @@ static func get_face_texture_x_offset(face : TrixelContainer.Face) -> int:
 	return offset_lookup[face]
 
 static func get_face_texture_tangent(face : TrixelContainer.Face) -> Vector3:
-	const tangent_lookup = [
+	const tangent_lookup := [
 		Vector3.RIGHT,   # Face.FRONT
 		Vector3.LEFT,    # Face.BACK
 		Vector3.RIGHT,   # Face.TOP
@@ -45,7 +45,7 @@ static func get_face_texture_tangent(face : TrixelContainer.Face) -> Vector3:
 	return tangent_lookup[face]
 	
 static func get_face_texture_cotangent(face : TrixelContainer.Face) -> Vector3:
-	const cotangent_lookup = [
+	const cotangent_lookup := [
 		Vector3.UP,   # Face.FRONT
 		Vector3.UP,   # Face.BACK
 		Vector3.BACK, # Face.TOP

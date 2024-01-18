@@ -24,7 +24,7 @@ func _recalculate_constants():
 	z_index = trixel_bounds.x * trixel_bounds.y
 
 func get_trixel_width_along_axis(axis : Vector3i) -> int:
-	var axis_size = trixel_bounds * axis
+	var axis_size := trixel_bounds * axis
 	return abs(axis_size.x + axis_size.y + axis_size.z)
 
 func is_within_bounds(pos : Vector3i) -> bool:
@@ -75,7 +75,7 @@ func initialize_trile(
 enum Face {FRONT, BACK, TOP, BOTTOM, LEFT, RIGHT}
 
 static func get_face_normal(face : Face) -> Vector3i:
-	const normal_lookup = [
+	const normal_lookup := [
 		Vector3i.BACK,    # Face.FRONT
 		Vector3i.FORWARD, # Face.BACK
 		Vector3i.UP,      # Face.TOP
@@ -86,7 +86,7 @@ static func get_face_normal(face : Face) -> Vector3i:
 	return normal_lookup[face]
 
 static func get_face_tangent(face : Face) -> Vector3i:
-	const tangent_lookup = [
+	const tangent_lookup := [
 		Vector3i.UP,      # Face.FRONT
 		Vector3i.UP,      # Face.BACK
 		Vector3i.RIGHT,   # Face.TOP
@@ -97,7 +97,7 @@ static func get_face_tangent(face : Face) -> Vector3i:
 	return tangent_lookup[face]
 	
 static func get_face_cotangent(face : Face) -> Vector3i:
-	const cotangent_lookup = [
+	const cotangent_lookup := [
 		Vector3i.RIGHT,   # Face.FRONT
 		Vector3i.RIGHT,   # Face.BACK
 		Vector3i.BACK,    # Face.TOP
