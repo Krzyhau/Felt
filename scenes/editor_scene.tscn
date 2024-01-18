@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://bu7kws1bt3n66"]
+[gd_scene load_steps=16 format=3 uid="uid://bu7kws1bt3n66"]
 
 [ext_resource type="Shader" path="res://graphics/shaders/boundaries.gdshader" id="1_fbdyu"]
 [ext_resource type="Script" path="res://scripts/orbiting_camera.gd" id="1_h65aw"]
@@ -7,6 +7,7 @@
 [ext_resource type="Shader" path="res://graphics/shaders/trixel_texture_projection.gdshader" id="4_utqbi"]
 [ext_resource type="Shader" path="res://graphics/shaders/vignette.gdshader" id="5_847bu"]
 [ext_resource type="Texture2D" uid="uid://krcx6hbfgc0q" path="res://graphics/debug_trixel_texture.png" id="5_yqlrp"]
+[ext_resource type="Script" path="res://scripts/trixel_tool.gd" id="8_ibxg4"]
 
 [sub_resource type="Environment" id="Environment_x2nqc"]
 background_mode = 1
@@ -32,6 +33,12 @@ shader_parameter/inner_faces = null
 shader_parameter/size = null
 shader_parameter/offset = null
 shader_parameter/TEXTURE = ExtResource("5_yqlrp")
+
+[sub_resource type="BoxMesh" id="BoxMesh_s4cgk"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_phlnc"]
+transparency = 1
+albedo_color = Color(1, 1, 1, 0.501961)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_xl74c"]
 shader = ExtResource("5_847bu")
@@ -75,6 +82,14 @@ surface_material_override/0 = SubResource("ShaderMaterial_5bqro")
 [node name="trixel_materializer" type="CSGMesh3D" parent="trixels_editor"]
 material = SubResource("ShaderMaterial_x3mgd")
 script = ExtResource("4_oiibr")
+
+[node name="trixel_tool" type="Node3D" parent="."]
+script = ExtResource("8_ibxg4")
+
+[node name="cursor" type="MeshInstance3D" parent="trixel_tool"]
+visible = false
+mesh = SubResource("BoxMesh_s4cgk")
+surface_material_override/0 = SubResource("StandardMaterial3D_phlnc")
 
 [node name="vignette_overlay" type="ColorRect" parent="."]
 material = SubResource("ShaderMaterial_xl74c")
