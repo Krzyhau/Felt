@@ -21,7 +21,7 @@ func _ready():
 	var worker_time = (end-start)/1000.0
 	print("TrixelEditor._ready() - %f ms" % worker_time)
 	
-	_rebuild_mesh()
+	# _rebuild_mesh()
 
 func _rebuild_mesh():
 	boundaries_object.scale = trixels.trile_size as Vector3 + Vector3.ONE * 0.01
@@ -59,12 +59,23 @@ func _create_csg_filler(mins : Vector3, maxs : Vector3, state : bool):
 	
 	var trixels_per_trile = trixels.trixels_per_trile
 	var trile_size = trixels.trile_size as Vector3
+	var trixel_bounds = trixels.trixel_bounds as Vector3
 	
-	box.scale = (maxs - mins + Vector3.ONE) / trixels_per_trile
-	box.position = ((mins + maxs + Vector3.ONE) / trixels_per_trile - trile_size) * 0.5
+	var region_size = (maxs - mins + Vector3.ONE)
+	var region_midpoint = (mins + maxs + Vector3.ONE) * 0.5
+	
+	box.scale = region_size / trixels_per_trile
+	box.position = region_midpoint / trixels_per_trile - trile_size * 0.5
 	
 	box.operation = CSGShape3D.OPERATION_UNION if state else CSGShape3D.OPERATION_SUBTRACTION
-	box.material = trixel_materializer.material
+	
+	var material = trixel_materializer.material.duplicate(true) as ShaderMaterial
+	material.set_shader_parameter("calculate_projection", true)
+	material.set_shader_parameter("inner_faces", not state)
+	material.set_shader_parameter("size", region_size / trixel_bounds)
+	material.set_shader_parameter("offset", region_midpoint / trixel_bounds)
+	box.material = material
+	
 	trixel_materializer.add_child(box)
 	temporary_csg_fillers.append(box)
 

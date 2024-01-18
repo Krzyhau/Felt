@@ -27,6 +27,10 @@ shader = ExtResource("1_fbdyu")
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_x3mgd"]
 render_priority = 0
 shader = ExtResource("4_utqbi")
+shader_parameter/calculate_projection = null
+shader_parameter/inner_faces = null
+shader_parameter/size = null
+shader_parameter/offset = null
 shader_parameter/TEXTURE = ExtResource("5_yqlrp")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_xl74c"]
