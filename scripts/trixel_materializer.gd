@@ -18,7 +18,6 @@ func _generate_mesh():
 	mesh_data.resize(Mesh.ARRAY_MAX)
 	mesh_data[Mesh.ARRAY_VERTEX] = PackedVector3Array()
 	mesh_data[Mesh.ARRAY_TEX_UV] = PackedVector2Array()
-	mesh_data[Mesh.ARRAY_INDEX] = PackedInt32Array()
 	
 	_generate_mesh_data(mesh_data)
 	
@@ -150,6 +149,10 @@ func _add_plane_to_mesh(mesh_arrays : Array, plane : Dictionary):
 	var face_offset_x = (dir_x * plane.size.x) as Vector3
 	var face_offset_y = (dir_y * plane.size.y) as Vector3
 	
+	face_corner = (face_corner / _trixels.trixels_per_trile) - _trixels.trile_size * 0.5
+	face_offset_x /= _trixels.trixels_per_trile
+	face_offset_y /= _trixels.trixels_per_trile
+	
 	var face_vertices = [
 		face_corner,
 		face_corner + face_offset_x,
@@ -159,28 +162,22 @@ func _add_plane_to_mesh(mesh_arrays : Array, plane : Dictionary):
 	
 	var uvs = []
 	for i in 4: uvs.push_back(TrixelCubemap.trixel_coords_to_uv(
-		face_vertices[i], plane.face, _trixels.trixel_bounds
+		face_vertices[i], plane.face, _trixels.trile_size
 	))
 	
 	# this check is a result of using abs on tangent vectors
 	const indices_clockwise = [2,1,0,0,3,2]
 	const indices_counter_clockwise = [0,1,2,2,3,0]
 	
-	var use_clockwise = face_normal.x < 0 or face_normal.y < 0 or face_normal.z > 0
+	var use_clockwise = face_normal.x < 0 or face_normal.y < 0 or face_normal.z < 0
 	var indices = indices_clockwise if use_clockwise else indices_counter_clockwise
 	
 	for i in indices:
-		var mesh_index = mesh_arrays[Mesh.ARRAY_VERTEX].rfind(face_vertices[i])
-		if mesh_index < 0:
-			mesh_index = len(mesh_arrays[Mesh.ARRAY_VERTEX])
-			mesh_arrays[Mesh.ARRAY_VERTEX].push_back(face_vertices[i])
-			mesh_arrays[Mesh.ARRAY_TEX_UV].push_back(uvs[i])
-		mesh_arrays[Mesh.ARRAY_INDEX].push_back(mesh_index)
+		mesh_arrays[Mesh.ARRAY_VERTEX].push_back(face_vertices[i])
+		mesh_arrays[Mesh.ARRAY_TEX_UV].push_back(uvs[i])
 
 func materialize(trixels : TrixelContainer):
 	_trixels = trixels
-	scale = Vector3.ONE / _trixels.trixels_per_trile
-	position = _trixels.trile_size * -0.5
 	
 	interrupt_if_active()
 	

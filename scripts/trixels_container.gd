@@ -76,33 +76,33 @@ enum Face {FRONT, BACK, TOP, BOTTOM, LEFT, RIGHT}
 
 static func get_face_normal(face : Face) -> Vector3i:
 	const normal_lookup = [
-		Vector3i.FORWARD, # Face.FRONT
-		Vector3i.BACK,    # Face.BACK
+		Vector3i.BACK,    # Face.FRONT
+		Vector3i.FORWARD, # Face.BACK
 		Vector3i.UP,      # Face.TOP
 		Vector3i.DOWN,    # Face.BOTTOM
 		Vector3i.LEFT,    # Face.LEFT
-		Vector3i.RIGHT    # Face.RIGHT
+		Vector3i.RIGHT,   # Face.RIGHT
 	]
 	return normal_lookup[face]
 
 static func get_face_tangent(face : Face) -> Vector3i:
 	const tangent_lookup = [
-		Vector3i.RIGHT,   # Face.FRONT
-		Vector3i.LEFT,    # Face.BACK
+		Vector3i.UP,      # Face.FRONT
+		Vector3i.UP,      # Face.BACK
 		Vector3i.RIGHT,   # Face.TOP
 		Vector3i.RIGHT,   # Face.BOTTOM
 		Vector3i.BACK,    # Face.LEFT
-		Vector3i.FORWARD  # Face.RIGHT
+		Vector3i.BACK,    # Face.RIGHT
 	]
 	return tangent_lookup[face]
 	
 static func get_face_cotangent(face : Face) -> Vector3i:
 	const cotangent_lookup = [
-		Vector3i.DOWN,    # Face.FRONT
-		Vector3i.DOWN,    # Face.BACK
+		Vector3i.RIGHT,   # Face.FRONT
+		Vector3i.RIGHT,   # Face.BACK
 		Vector3i.BACK,    # Face.TOP
-		Vector3i.FORWARD, # Face.BOTTOM
-		Vector3i.DOWN,    # Face.LEFT
-		Vector3i.DOWN     # Face.RIGHT
+		Vector3i.BACK,    # Face.BOTTOM
+		Vector3i.UP,      # Face.LEFT
+		Vector3i.UP,      # Face.RIGHT
 	]
 	return cotangent_lookup[face]

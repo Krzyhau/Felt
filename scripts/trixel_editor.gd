@@ -14,7 +14,7 @@ func _ready():
 	var start = Time.get_ticks_usec()
 	
 	trixels = TrixelContainer.new()
-	trixels.initialize_trile(Vector3i(4,4,4))
+	trixels.initialize_trile()
 	fill(Vector3i.ZERO, trixels.trixel_bounds - Vector3i.ONE, true)
 	
 	var end = Time.get_ticks_usec()
@@ -48,16 +48,23 @@ func _process(_delta):
 		)
 		
 		if mode > 1: fill(corner1, corner2, true if mode == 3 else false)
-		_rebuild_mesh()
+		if mode == 1: _rebuild_mesh()
 
 func _trixel_materialized(_trixels : TrixelContainer, interrupted : bool):
-	if not interrupted: _clear_csg_fillers()
+	if not interrupted: 
+		_clear_csg_fillers()
 
-func _create_csg_filler(mins : Vector3i, maxs : Vector3i, state : bool):
+func _create_csg_filler(mins : Vector3, maxs : Vector3, state : bool):
 	var box = CSGBox3D.new()
-	box.scale = (maxs - mins + Vector3i.ONE)
-	box.position = (mins + maxs + Vector3i.ONE) as Vector3 * 0.5
+	
+	var trixels_per_trile = trixels.trixels_per_trile
+	var trile_size = trixels.trile_size as Vector3
+	
+	box.scale = (maxs - mins + Vector3.ONE) / trixels_per_trile
+	box.position = ((mins + maxs + Vector3.ONE) / trixels_per_trile - trile_size) * 0.5
+	
 	box.operation = CSGShape3D.OPERATION_UNION if state else CSGShape3D.OPERATION_SUBTRACTION
+	box.material = trixel_materializer.material
 	trixel_materializer.add_child(box)
 	temporary_csg_fillers.append(box)
 
