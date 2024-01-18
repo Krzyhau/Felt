@@ -14,12 +14,13 @@ config/name="Felt"
 run/main_scene="res://scenes/editor_scene.tscn"
 config/features=PackedStringArray("4.2", "GL Compatibility")
 boot_splash/bg_color=Color(0.0470588, 0.0117647, 0.101961, 1)
+boot_splash/image="res://splash.png"
 config/icon="res://icon.svg"
 
 [display]
 
-window/size/viewport_width=1366
-window/size/viewport_height=768
+window/size/viewport_width=1200
+window/size/viewport_height=800
 
 [input]
 
