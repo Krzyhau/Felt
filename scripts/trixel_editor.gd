@@ -28,7 +28,7 @@ func _rebuild_mesh():
 	trixel_materializer.materialize(trixels)
 
 
-func _process(delta):
+func _process(_delta):
 	var mode: int = 0
 	if Input.is_action_just_pressed("debug_refresh"): mode = 1
 	if Input.is_action_just_pressed("debug_fill_random"): mode = 2
@@ -50,7 +50,7 @@ func _process(delta):
 		if mode > 1: fill(corner1, corner2, true if mode == 3 else false)
 		_rebuild_mesh()
 
-func _trixel_materialized(trixels : TrixelContainer, interrupted : bool):
+func _trixel_materialized(_trixels : TrixelContainer, interrupted : bool):
 	if not interrupted: _clear_csg_fillers()
 
 func _create_csg_filler(mins : Vector3i, maxs : Vector3i, state : bool):
