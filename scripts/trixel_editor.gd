@@ -14,14 +14,15 @@ func _ready():
 	var start := Time.get_ticks_usec()
 	
 	trixels = TrixelContainer.new()
-	trixels.initialize_trile(Vector3i(4,4,4))
+	trixels.initialize_trile()
 	fill(Vector3i.ZERO, trixels.trixel_bounds - Vector3i.ONE, true)
+	fill(Vector3i(8,8,8), trixels.trixel_bounds - Vector3i.ONE, false)
 	
 	var end = Time.get_ticks_usec()
 	var worker_time = (end-start)/1000.0
 	print("TrixelEditor._ready() - %f ms" % worker_time)
 	
-	# _rebuild_mesh()
+	_rebuild_mesh()
 
 func _rebuild_mesh():
 	boundaries_object.scale = trixels.trile_size as Vector3 + Vector3.ONE * 0.01
@@ -98,3 +99,20 @@ func fill(corner1 : Vector3i, corner2 : Vector3i, state: bool):
 	
 	trixels.fill_trixels(smallest, largest, state)
 	_create_csg_filler(smallest, largest, state)
+
+func get_local_to_trixel(local_pos : Vector3) -> Vector3:
+	var trixels_per_trile := trixels.trixels_per_trile
+	var trile_size := trixels.trile_size as Vector3
+	return ((local_pos + trile_size / 2.0) * trixels_per_trile)
+	
+func get_global_to_trixel(global_pos : Vector3) -> Vector3:
+	return get_local_to_trixel(self.to_local(global_pos))
+
+func get_trixel_to_local(trixel_pos : Vector3) -> Vector3:
+	var trixels_per_trile := trixels.trixels_per_trile
+	var trile_size := trixels.trile_size as Vector3
+	return (trixel_pos / trixels_per_trile) - trile_size / 2.0
+
+func get_trixel_to_global(trixel_pos : Vector3) -> Vector3:
+	return self.to_global(get_trixel_to_local(trixel_pos))
+	

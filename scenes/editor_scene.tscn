@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://bu7kws1bt3n66"]
+[gd_scene load_steps=17 format=3 uid="uid://bu7kws1bt3n66"]
 
 [ext_resource type="Shader" path="res://graphics/shaders/boundaries.gdshader" id="1_fbdyu"]
 [ext_resource type="Script" path="res://scripts/orbiting_camera.gd" id="1_h65aw"]
@@ -38,13 +38,19 @@ shader_parameter/TEXTURE = ExtResource("5_yqlrp")
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_phlnc"]
 transparency = 1
-albedo_color = Color(1, 1, 1, 0.501961)
+albedo_color = Color(0, 0, 1, 0.501961)
+metallic_specular = 0.0
+emission_enabled = true
+emission = Color(0, 0, 1, 1)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_xl74c"]
 shader = ExtResource("5_847bu")
 shader_parameter/alpha = 0.2
 shader_parameter/inner_radius = 0.405
 shader_parameter/outer_radius = 1.625
+
+[sub_resource type="LabelSettings" id="LabelSettings_itktt"]
+font_size = 32
 
 [node name="editor_scene" type="Node3D"]
 
@@ -83,10 +89,13 @@ surface_material_override/0 = SubResource("ShaderMaterial_5bqro")
 material = SubResource("ShaderMaterial_x3mgd")
 script = ExtResource("4_oiibr")
 
-[node name="trixel_tool" type="Node3D" parent="."]
+[node name="trixel_tool" type="Node3D" parent="." node_paths=PackedStringArray("trixel_editor", "debug_label")]
 script = ExtResource("8_ibxg4")
+trixel_editor = NodePath("../trixels_editor")
+debug_label = NodePath("../Label")
 
 [node name="cursor" type="MeshInstance3D" parent="trixel_tool"]
+transform = Transform3D(1.02, 0, 0, 0, 1.02, 0, 0, 0, 1.02, 0.5, 0.5, 0.5)
 visible = false
 mesh = SubResource("BoxMesh_s4cgk")
 surface_material_override/0 = SubResource("StandardMaterial3D_phlnc")
@@ -98,3 +107,11 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+
+[node name="Label" type="Label" parent="."]
+offset_left = 19.0
+offset_top = 14.0
+offset_right = 141.0
+offset_bottom = 37.0
+text = "Hit trixel: (0,0,0)"
+label_settings = SubResource("LabelSettings_itktt")
