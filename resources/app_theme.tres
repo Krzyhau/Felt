@@ -1,0 +1,35 @@
+[gd_resource type="Theme" load_steps=6 format=3 uid="uid://cmydy5fbx3efb"]
+
+[ext_resource type="FontFile" uid="uid://c7adub7gy302x" path="res://resources/fonts/font-awesome-solid.otf" id="1_f4bft"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_22wqr"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_g1cie"]
+bg_color = Color(0.25098, 0.25098, 0.25098, 0.501961)
+corner_radius_top_left = 9
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3lbwe"]
+bg_color = Color(0.125911, 0.125911, 0.125911, 0.501961)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1n3m5"]
+bg_color = Color(0.501961, 0.501961, 0.501961, 0.501961)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[resource]
+ToolButton/base_type = &"Button"
+ToolButton/font_sizes/font_size = 48
+ToolButton/fonts/font = ExtResource("1_f4bft")
+ToolButton/styles/focus = SubResource("StyleBoxEmpty_22wqr")
+ToolButton/styles/hover = SubResource("StyleBoxFlat_g1cie")
+ToolButton/styles/normal = SubResource("StyleBoxFlat_3lbwe")
+ToolButton/styles/pressed = SubResource("StyleBoxFlat_1n3m5")

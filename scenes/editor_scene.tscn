@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://bu7kws1bt3n66"]
+[gd_scene load_steps=20 format=3 uid="uid://bu7kws1bt3n66"]
 
 [ext_resource type="Shader" path="res://graphics/shaders/boundaries.gdshader" id="1_fbdyu"]
 [ext_resource type="Script" path="res://scripts/orbiting_camera.gd" id="1_h65aw"]
@@ -8,6 +8,8 @@
 [ext_resource type="Shader" path="res://graphics/shaders/vignette.gdshader" id="5_847bu"]
 [ext_resource type="Texture2D" uid="uid://krcx6hbfgc0q" path="res://graphics/debug_trixel_texture.png" id="5_yqlrp"]
 [ext_resource type="Script" path="res://scripts/trixel_tool.gd" id="8_ibxg4"]
+[ext_resource type="FontFile" uid="uid://bvsruta6u47fy" path="res://resources/fonts/righteous.ttf" id="9_g152l"]
+[ext_resource type="Theme" uid="uid://cmydy5fbx3efb" path="res://resources/app_theme.tres" id="10_33n0x"]
 
 [sub_resource type="Environment" id="Environment_x2nqc"]
 background_mode = 1
@@ -50,7 +52,10 @@ shader_parameter/inner_radius = 0.405
 shader_parameter/outer_radius = 1.625
 
 [sub_resource type="LabelSettings" id="LabelSettings_itktt"]
+font = ExtResource("9_g152l")
 font_size = 32
+
+[sub_resource type="ButtonGroup" id="ButtonGroup_nasnq"]
 
 [node name="editor_scene" type="Node3D"]
 
@@ -89,11 +94,12 @@ surface_material_override/0 = SubResource("ShaderMaterial_5bqro")
 material = SubResource("ShaderMaterial_x3mgd")
 script = ExtResource("4_oiibr")
 
-[node name="trixel_tool" type="Node3D" parent="." node_paths=PackedStringArray("trixel_editor", "debug_label")]
+[node name="trixel_tool" type="Node3D" parent="." node_paths=PackedStringArray("trixel_editor", "debug_label", "place_button", "erase_button")]
 script = ExtResource("8_ibxg4")
 trixel_editor = NodePath("../trixels_editor")
-debug_label = NodePath("../Interface/Label")
-mode = 1
+debug_label = NodePath("../interface/hover_pos_label")
+place_button = NodePath("../interface/tools_buttons/trixel_place_button")
+erase_button = NodePath("../interface/tools_buttons/trixel_erase_button")
 cursor_oversize = 0.001
 
 [node name="cursor" type="MeshInstance3D" parent="trixel_tool"]
@@ -102,15 +108,16 @@ visible = false
 mesh = SubResource("BoxMesh_s4cgk")
 surface_material_override/0 = SubResource("StandardMaterial3D_phlnc")
 
-[node name="Interface" type="Control" parent="."]
+[node name="interface" type="Control" parent="."]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("10_33n0x")
 
-[node name="vignette_overlay" type="ColorRect" parent="Interface"]
+[node name="vignette_overlay" type="ColorRect" parent="interface"]
 material = SubResource("ShaderMaterial_xl74c")
 layout_mode = 1
 anchors_preset = 15
@@ -119,10 +126,124 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Label" type="Label" parent="Interface"]
-offset_left = 19.0
-offset_top = 14.0
-offset_right = 263.0
-offset_bottom = 59.0
-text = "Hit trixel: (0,0,0)"
+[node name="hover_pos_label" type="Label" parent="interface"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 33.0
+offset_top = -60.0
+offset_right = 277.0
+offset_bottom = -20.0
+grow_vertical = 0
+text = "0,0,0"
 label_settings = SubResource("LabelSettings_itktt")
+
+[node name="tools_buttons" type="VBoxContainer" parent="interface"]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_top = -232.0
+offset_right = 80.0
+offset_bottom = 232.0
+grow_vertical = 2
+
+[node name="select_button" type="Button" parent="interface/tools_buttons"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_type_variation = &"ToolButton"
+toggle_mode = true
+button_group = SubResource("ButtonGroup_nasnq")
+text = ""
+
+[node name="padding" type="Control" parent="interface/tools_buttons"]
+custom_minimum_size = Vector2(0, 16)
+layout_mode = 2
+
+[node name="trixel_place_button" type="Button" parent="interface/tools_buttons"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_type_variation = &"ToolButton"
+toggle_mode = true
+button_group = SubResource("ButtonGroup_nasnq")
+text = ""
+
+[node name="trixel_erase_button" type="Button" parent="interface/tools_buttons"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_type_variation = &"ToolButton"
+toggle_mode = true
+button_group = SubResource("ButtonGroup_nasnq")
+text = ""
+
+[node name="padding2" type="Control" parent="interface/tools_buttons"]
+custom_minimum_size = Vector2(0, 16)
+layout_mode = 2
+
+[node name="color_paint_button" type="Button" parent="interface/tools_buttons"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_type_variation = &"ToolButton"
+toggle_mode = true
+button_group = SubResource("ButtonGroup_nasnq")
+text = ""
+
+[node name="color_picker_button" type="Button" parent="interface/tools_buttons"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_type_variation = &"ToolButton"
+toggle_mode = true
+button_group = SubResource("ButtonGroup_nasnq")
+text = ""
+
+[node name="color_primary_button" type="Button" parent="interface/tools_buttons"]
+custom_minimum_size = Vector2(64, 48)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_type_variation = &"ToolButton"
+
+[node name="color" type="ColorRect" parent="interface/tools_buttons/color_primary_button"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -15.0
+offset_right = 20.0
+offset_bottom = 15.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="color_secondary_button" type="Button" parent="interface/tools_buttons"]
+custom_minimum_size = Vector2(64, 48)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_type_variation = &"ToolButton"
+
+[node name="color" type="ColorRect" parent="interface/tools_buttons/color_secondary_button"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -15.0
+offset_right = 20.0
+offset_bottom = 15.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="padding3" type="Control" parent="interface/tools_buttons"]
+custom_minimum_size = Vector2(0, 16)
+layout_mode = 2
