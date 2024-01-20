@@ -92,26 +92,37 @@ script = ExtResource("4_oiibr")
 [node name="trixel_tool" type="Node3D" parent="." node_paths=PackedStringArray("trixel_editor", "debug_label")]
 script = ExtResource("8_ibxg4")
 trixel_editor = NodePath("../trixels_editor")
-debug_label = NodePath("../Label")
+debug_label = NodePath("../Interface/Label")
+mode = 1
+cursor_oversize = 0.001
 
 [node name="cursor" type="MeshInstance3D" parent="trixel_tool"]
-transform = Transform3D(1.02, 0, 0, 0, 1.02, 0, 0, 0, 1.02, 0.5, 0.5, 0.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0.5, 0.5)
 visible = false
 mesh = SubResource("BoxMesh_s4cgk")
 surface_material_override/0 = SubResource("StandardMaterial3D_phlnc")
 
-[node name="vignette_overlay" type="ColorRect" parent="."]
-material = SubResource("ShaderMaterial_xl74c")
+[node name="Interface" type="Control" parent="."]
+layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Label" type="Label" parent="."]
+[node name="vignette_overlay" type="ColorRect" parent="Interface"]
+material = SubResource("ShaderMaterial_xl74c")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="Interface"]
 offset_left = 19.0
 offset_top = 14.0
-offset_right = 141.0
-offset_bottom = 37.0
+offset_right = 263.0
+offset_bottom = 59.0
 text = "Hit trixel: (0,0,0)"
 label_settings = SubResource("LabelSettings_itktt")

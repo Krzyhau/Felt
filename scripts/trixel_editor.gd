@@ -16,7 +16,6 @@ func _ready():
 	trixels = TrixelContainer.new()
 	trixels.initialize_trile()
 	fill(Vector3i.ZERO, trixels.trixel_bounds - Vector3i.ONE, true)
-	fill(Vector3i(8,8,8), trixels.trixel_bounds - Vector3i.ONE, false)
 	
 	var end = Time.get_ticks_usec()
 	var worker_time = (end-start)/1000.0
@@ -30,26 +29,7 @@ func _rebuild_mesh():
 
 
 func _process(_delta):
-	var mode: int = 0
-	if Input.is_action_just_pressed("debug_refresh"): mode = 1
-	if Input.is_action_just_pressed("debug_fill_random"): mode = 2
-	if Input.is_action_just_pressed("debug_clear_random"): mode = 3
-	
-	if mode > 0:
-		var rng = RandomNumberGenerator.new()
-		var corner1 = Vector3i(
-			rng.randi_range(0, trixels.trixel_bounds.x - 1),
-			rng.randi_range(0, trixels.trixel_bounds.y - 1),
-			rng.randi_range(0, trixels.trixel_bounds.z - 1),
-		)
-		var corner2 = Vector3i(
-			rng.randi_range(0, trixels.trixel_bounds.x - 1),
-			rng.randi_range(0, trixels.trixel_bounds.y - 1),
-			rng.randi_range(0, trixels.trixel_bounds.z - 1),
-		)
-		
-		if mode > 1: fill(corner1, corner2, true if mode == 3 else false)
-		if mode == 1: _rebuild_mesh()
+	if Input.is_action_just_pressed("debug_refresh"): _rebuild_mesh()
 
 func _trixel_materialized(_trixels : TrixelContainer, interrupted : bool):
 	if not interrupted: 

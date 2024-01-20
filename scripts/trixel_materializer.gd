@@ -36,7 +36,8 @@ func _generate_mesh():
 func _on_materialized(interrupted : bool):
 	if not interrupted:
 		mesh = ArrayMesh.new()
-		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, mesh_data)
+		if len(mesh_data[Mesh.ARRAY_VERTEX]) != 0:
+			mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, mesh_data)
 	materialized.emit(_trixels, interrupted)
 
 func _generate_mesh_data(mesh_arrays : Array):
