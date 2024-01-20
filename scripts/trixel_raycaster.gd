@@ -61,6 +61,6 @@ static func cast_in_trile_space(trile : Trile, start : Vector3, dir : Vector3) -
 static func try_hit_trixel_bounds(
 	trile : Trile, start : Vector3, dir : Vector3
 ):
-	var size := trile.trixel_bounds as Vector3
+	var size := Vector3.ONE * trile.size_in_trixels
 	var trile_aabb := AABB(Vector3.ZERO, size)
 	return trile_aabb.intersects_segment(start, start + dir * 1000)

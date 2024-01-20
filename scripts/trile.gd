@@ -3,11 +3,11 @@ class_name Trile extends ArrayMesh
 enum Face {FRONT, BACK, TOP, BOTTOM, LEFT, RIGHT}
 
 const DEFAULT_RESOLUTION = 16
-const DEFAULT_SIZE = Vector3i.ONE
+const DEFAULT_SIZE = 1
 
 var resolution : int # how many trixels within a trile unit
-var size : Vector3i # the size of a trile, in units
-var trixel_bounds : Vector3i # the size of a trile, in trixels
+var size : int # the size of a trile, in units
+var size_in_trixels : int # the size of a trile, in trixels
 var trixels_count : int # the number of triles stored in this trile
 
 var y_index : int
@@ -19,7 +19,7 @@ var cubemap : TrileCubemap
 var material : ShaderMaterial
 
 func _init(
-	trile_size : Vector3i = DEFAULT_SIZE, 
+	trile_size : int = DEFAULT_SIZE, 
 	trile_resolution : int = DEFAULT_RESOLUTION
 ):
 	size = trile_size
@@ -34,11 +34,11 @@ func _initialize_data_buffer():
 	buffer.resize(trixels_count)
 
 func _recalculate_constants():
-	trixel_bounds = size * resolution
-	trixels_count = trixel_bounds.x * trixel_bounds.y * trixel_bounds.z
-	y_index = trixel_bounds.x
-	z_index = trixel_bounds.x * trixel_bounds.y
-	
+	size_in_trixels = size * resolution
+	trixels_count = size_in_trixels * size_in_trixels * size_in_trixels 
+	y_index = size_in_trixels
+	z_index = size_in_trixels * size_in_trixels
+
 func _create_materializer():
 	materializer = TrileMaterializer.new(self)
 	materializer.materialized.connect(_on_materialized)
@@ -61,14 +61,10 @@ func _initialize_material():
 func rebuild_mesh():
 	materializer.materialize()
 
-func get_trixel_width_along_axis(axis : Vector3i) -> int:
-	var axis_size := trixel_bounds * axis
-	return abs(axis_size.x + axis_size.y + axis_size.z)
-
 func contains_trixel_pos(pos : Vector3i) -> bool:
-	return pos.x >= 0 and pos.x < trixel_bounds.x \
-	and pos.y >= 0 and pos.y < trixel_bounds.y \
-	and pos.z >= 0 and pos.z < trixel_bounds.z
+	return pos.x >= 0 and pos.x < size_in_trixels \
+	and pos.y >= 0 and pos.y < size_in_trixels \
+	and pos.z >= 0 and pos.z < size_in_trixels
 
 func get_trixel(pos : Vector3i) -> bool:
 	if not contains_trixel_pos(pos): return false
@@ -81,30 +77,30 @@ func is_trixel_face_solid(pos : Vector3i, face : Face) -> bool:
 	return get_trixel(pos) and not get_trixel(pos + Trile.get_face_normal(face))
 
 func set_trixel(pos : Vector3i, state : bool):
-	if pos.x >= 0 and pos.x < trixel_bounds.x \
-	and pos.y >= 0 and pos.y < trixel_bounds.y \
-	and pos.z >= 0 and pos.z < trixel_bounds.z :
+	if pos.x >= 0 and pos.x < size_in_trixels \
+	and pos.y >= 0 and pos.y < size_in_trixels \
+	and pos.z >= 0 and pos.z < size_in_trixels :
 		buffer[pos.x + pos.y*y_index + pos.z*z_index] = 1 if state else 0
 	
 func set_trixels(positions : Array, state : bool):
 	for pos in positions:
-		if pos.x >= 0 and pos.x < trixel_bounds.x \
-		and pos.y >= 0 and pos.y < trixel_bounds.y \
-		and pos.z >= 0 and pos.z < trixel_bounds.z :
+		if pos.x >= 0 and pos.x < size_in_trixels \
+		and pos.y >= 0 and pos.y < size_in_trixels \
+		and pos.z >= 0 and pos.z < size_in_trixels :
 			buffer[pos.x + pos.y*y_index + pos.z*z_index] = 1 if state else 0
 
 func fill_trixels(mins : Vector3i, maxs : Vector3i, state : bool):
-	var range_x = range(maxi(mins.x, 0), mini(maxs.x+1, trixel_bounds.x))
-	var range_y = range(maxi(mins.y, 0), mini(maxs.y+1, trixel_bounds.y))
-	var range_z = range(maxi(mins.z, 0), mini(maxs.z+1, trixel_bounds.z))
+	var range_x = range(maxi(mins.x, 0), mini(maxs.x+1, size_in_trixels))
+	var range_y = range(maxi(mins.y, 0), mini(maxs.y+1, size_in_trixels))
+	var range_z = range(maxi(mins.z, 0), mini(maxs.z+1, size_in_trixels))
 	for x in range_x: for y in range_y: for z in range_z:
 		buffer[x + y*y_index + z*z_index] = 1 if state else 0
 
 func trixel_to_local(trixel_pos : Vector3) -> Vector3:
-	return (trixel_pos / resolution) - (size as Vector3) / 2.0
+	return (trixel_pos / resolution) - Vector3.ONE * (size / 2.0)
 
 func local_to_trixel(local_pos : Vector3) -> Vector3:
-	return (local_pos + (size as Vector3) / 2.0) * resolution
+	return (local_pos + Vector3.ONE * (size / 2.0)) * resolution
 
 static func get_face_normal(face : Face) -> Vector3i:
 	const normal_lookup := [

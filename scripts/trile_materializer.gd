@@ -60,26 +60,20 @@ func _on_materialized(interrupted : bool):
 	materialized.emit(_trile, _mesh_data, interrupted)
 
 func _generate_mesh_data(mesh_arrays : Array):
-	for face in 6:
-		var layer_dir = Trile.get_face_normal(face).abs()
-		var layer_dir_depth = _trile.get_trixel_width_along_axis(layer_dir)
-		
-		for layer in layer_dir_depth:
-			var trixel_faces := _get_trixel_faces_map(face, layer)
-			var planes = _find_planes_in_layer(face, trixel_faces)
-			for plane in planes: 
-				_add_plane_to_mesh(mesh_arrays, plane.position, plane.size, face)
+	for face in 6: for layer in _trile.size_in_trixels:
+		var trixel_faces := _get_trixel_faces_map(face, layer)
+		var planes = _find_planes_in_layer(face, trixel_faces)
+		for plane in planes: 
+			_add_plane_to_mesh(mesh_arrays, plane.position, plane.size, face)
 
-			if _should_stop(): return
+		if _should_stop(): return
 
 # performs a greedy search on a 2D slice of a trile art to find rectangular planes
 # returns an array of planes, where each plane stores 3D position of its corner and size
 func _find_planes_in_layer(face : Trile.Face, trixel_faces : Dictionary) -> Array:
 	var dir_x := Trile.get_face_tangent(face).abs()
 	var dir_y := Trile.get_face_cotangent(face).abs()
-
-	var layer_size_x := _trile.get_trixel_width_along_axis(dir_x)
-	var layer_size_y := _trile.get_trixel_width_along_axis(dir_y)
+	var trile_size := _trile.size_in_trixels
 	
 	var planes := []
 	while trixel_faces.size() > 0:
@@ -88,7 +82,7 @@ func _find_planes_in_layer(face : Trile.Face, trixel_faces : Dictionary) -> Arra
 		var plane_size := Vector2i(1,1)
 		
 		# greedy search in relative x axis
-		while plane_size.x < layer_size_x:
+		while plane_size.x < trile_size:
 			var face_pos := plane_position + dir_x * plane_size.x
 			if trixel_faces.has(face_pos):
 				trixel_faces.erase(face_pos)
@@ -96,7 +90,7 @@ func _find_planes_in_layer(face : Trile.Face, trixel_faces : Dictionary) -> Arra
 			else: break
 		
 		# greedy search in relative y axis
-		while plane_size.y < layer_size_y:
+		while plane_size.y < trile_size:
 			var face_pos_y := plane_position + dir_y * plane_size.y
 			var valid_faces := []
 			for x in plane_size.x:
@@ -121,10 +115,7 @@ func _get_trixel_faces_map(face : Trile.Face, depth : int) -> Dictionary:
 	var dir_x := Trile.get_face_tangent(face).abs()
 	var dir_y := Trile.get_face_cotangent(face).abs()
 	var dir_z := Trile.get_face_normal(face).abs()
-
-	var layer_size_x := _trile.get_trixel_width_along_axis(dir_x)
-	var layer_size_y := _trile.get_trixel_width_along_axis(dir_y)
-	var layer_size_z := _trile.get_trixel_width_along_axis(dir_z)
+	var trile_size := _trile.size_in_trixels
 
 	var x_index := 1 if dir_x.x else _trile.y_index if dir_x.y else _trile.z_index
 	var y_index := 1 if dir_y.x else _trile.y_index if dir_y.y else _trile.z_index
@@ -132,17 +123,17 @@ func _get_trixel_faces_map(face : Trile.Face, depth : int) -> Dictionary:
 
 	var face_normal := Trile.get_face_normal(face)
 	var depth_offset := (face_normal.x + face_normal.y + face_normal.z)
-	var abs_depth := depth if depth_offset > 0 else layer_size_z - 1 - depth
+	var abs_depth := depth if depth_offset > 0 else trile_size - 1 - depth
 	var z_offset := abs_depth * z_index
 	var z_top_offset := z_offset + depth_offset * z_index
 
 	var trixel_faces := Dictionary()
 	
 	var buffer := _trile.buffer
-	var has_top := depth + 1 < layer_size_z
+	var has_top := depth + 1 < trile_size
 	var face_z_pos := dir_z * abs_depth
 	
-	for x in layer_size_x: for y in layer_size_y:
+	for x in trile_size: for y in trile_size:
 		if buffer[x * x_index + y * y_index + z_offset] \
 		and not (has_top and buffer[x * x_index + y * y_index + z_top_offset]):
 			trixel_faces[x * dir_x + y * dir_y + face_z_pos] = true
@@ -164,7 +155,7 @@ func _add_plane_to_mesh(
 	var face_offset_x := (dir_x * size.x) as Vector3
 	var face_offset_y := (dir_y * size.y) as Vector3
 	
-	face_corner = (face_corner / _trile.resolution) - _trile.size * 0.5
+	face_corner = (face_corner / _trile.resolution) - Vector3.ONE * (_trile.size * 0.5)
 	face_offset_x /= _trile.resolution
 	face_offset_y /= _trile.resolution
 	
@@ -176,9 +167,8 @@ func _add_plane_to_mesh(
 	]
 	
 	var uvs := []
-	for i in 4: uvs.push_back(TrileCubemap.trixel_coords_to_uv(
-		face_vertices[i], face, _trile.size
-	))
+	for i in 4:
+		uvs.push_back(TrileCubemap.trixel_coords_to_uv(face_vertices[i], face, _trile))
 	
 	# this check is a result of using abs on tangent vectors
 	const indices_clockwise := [2,1,0,0,3,2]
@@ -190,8 +180,3 @@ func _add_plane_to_mesh(
 	for i in indices:
 		mesh_arrays[Mesh.ARRAY_VERTEX].push_back(face_vertices[i])
 		mesh_arrays[Mesh.ARRAY_TEX_UV].push_back(uvs[i])
-
-
-
-
-

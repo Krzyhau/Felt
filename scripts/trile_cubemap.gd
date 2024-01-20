@@ -3,13 +3,13 @@ class_name TrileCubemap extends ImageTexture
 static func trixel_coords_to_uv(
 	coords : Vector3, 
 	face : Trile.Face,
-	trile_size : Vector3i
+	trile : Trile
 ) -> Vector2:
 	var texture_offset_x := TrileCubemap.get_face_texture_x_offset(face)
 	
 	var face_normal := Trile.get_face_normal(face) as Vector3
 	
-	var trixel_scaled_position := (coords as Vector3) / (trile_size as Vector3)
+	var trixel_scaled_position := (coords as Vector3) / (Vector3.ONE * trile.size)
 	var texture_plane_pos := (Vector3.ONE - face_normal.abs()) * trixel_scaled_position + (face_normal + Vector3.ONE) * 0.5
 	var tangent: = TrileCubemap.get_face_texture_tangent(face)
 	var cotangent := TrileCubemap.get_face_texture_cotangent(face)
