@@ -7,7 +7,7 @@
 [ext_resource type="Shader" path="res://graphics/shaders/trixel_texture_projection.gdshader" id="4_utqbi"]
 [ext_resource type="Shader" path="res://graphics/shaders/vignette.gdshader" id="5_847bu"]
 [ext_resource type="Texture2D" uid="uid://krcx6hbfgc0q" path="res://graphics/debug_trixel_texture.png" id="5_yqlrp"]
-[ext_resource type="Script" path="res://scripts/trixel_tool.gd" id="8_ibxg4"]
+[ext_resource type="Script" path="res://scripts/trixel_placer.gd" id="7_nk0l3"]
 [ext_resource type="FontFile" uid="uid://bvsruta6u47fy" path="res://resources/fonts/righteous.ttf" id="9_g152l"]
 [ext_resource type="Script" path="res://scripts/ui_mouse_zone.gd" id="9_ohhbn"]
 [ext_resource type="Theme" uid="uid://cmydy5fbx3efb" path="res://resources/app_theme.tres" id="10_33n0x"]
@@ -95,15 +95,15 @@ surface_material_override/0 = SubResource("ShaderMaterial_5bqro")
 material = SubResource("ShaderMaterial_x3mgd")
 script = ExtResource("4_oiibr")
 
-[node name="trixel_tool" type="Node3D" parent="." node_paths=PackedStringArray("trile_editor", "debug_label", "place_button", "erase_button")]
-script = ExtResource("8_ibxg4")
+[node name="trixel_placer" type="Node3D" parent="." node_paths=PackedStringArray("trile_editor", "debug_label", "primary_action_button", "secondary_action_button")]
+script = ExtResource("7_nk0l3")
 trile_editor = NodePath("../trile_editor")
 debug_label = NodePath("../interface/hover_pos_label")
-place_button = NodePath("../interface/tools_buttons/trixel_place_button")
-erase_button = NodePath("../interface/tools_buttons/trixel_erase_button")
+primary_action_button = NodePath("../interface/tools_buttons/trixel_place_button")
+secondary_action_button = NodePath("../interface/tools_buttons/trixel_erase_button")
 cursor_oversize = 0.001
 
-[node name="cursor" type="MeshInstance3D" parent="trixel_tool"]
+[node name="cursor" type="MeshInstance3D" parent="trixel_placer"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0.5, 0.5)
 visible = false
 mesh = SubResource("BoxMesh_s4cgk")

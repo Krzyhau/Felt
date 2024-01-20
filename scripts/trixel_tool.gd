@@ -1,11 +1,11 @@
 class_name TrixelTool extends Node
 
-enum Mode {NONE, PLACING, ERASING}
+enum Mode {NONE, PRIMARY, SECONDARY}
 
 @export var trile_editor : TrileEditor
 @export var debug_label : Label
-@export var place_button : Button
-@export var erase_button : Button
+@export var primary_action_button : Button
+@export var secondary_action_button : Button
 @export var cursor_oversize : float
 
 @onready var cursor := $cursor
@@ -20,14 +20,14 @@ var _last_trixel_position : Vector3i
 var _aiming_at_trile : bool
 
 func _ready():
-	place_button.toggled.connect(_on_buttons_toggled)
-	erase_button.toggled.connect(_on_buttons_toggled)
+	primary_action_button.toggled.connect(_on_buttons_toggled)
+	secondary_action_button.toggled.connect(_on_buttons_toggled)
 	
 	debug_label.text = ""
 
 func _on_buttons_toggled(_b):
-	if place_button.button_pressed: mode = Mode.PLACING
-	elif erase_button.button_pressed: mode = Mode.ERASING
+	if primary_action_button.button_pressed: mode = Mode.PRIMARY
+	elif secondary_action_button.button_pressed: mode = Mode.SECONDARY
 	else: mode = Mode.NONE
 
 func _input(event):
@@ -51,12 +51,10 @@ func _input_handle_mode_switching():
 		switch = true
 	
 	if switch:
-		if mode == Mode.PLACING: 
-			erase_button.pressed.emit()
-			erase_button.button_pressed = true
-		elif mode == Mode.ERASING: 
-			place_button.pressed.emit()
-			place_button.button_pressed = true
+		if mode == Mode.PRIMARY: 
+			secondary_action_button.button_pressed = true
+		elif mode == Mode.SECONDARY: 
+			primary_action_button.button_pressed = true
 	
 
 func _process(_delta):
@@ -69,11 +67,6 @@ func _process(_delta):
 
 func _update_cursor():
 	cursor.visible = _selecting or _aiming_at_trile
-	var material : StandardMaterial3D = cursor.get_surface_override_material(0)
-	const color_placing := Color(0.0,0.0,1.0,0.5)
-	const color_erasing := Color(1.0,0.0,0.0,0.5)
-	material.albedo_color = color_placing if mode == Mode.PLACING else color_erasing
-	material.emission = material.albedo_color
 	
 	var start_pos := trile_editor.get_trixel_to_global(_last_trixel_position)
 	var end_pos := trile_editor.get_trixel_to_global(_selection_start_trixel_pos)
@@ -89,30 +82,24 @@ func _update_cursor():
 	self.scale = min_size + oversize_scale + (end_pos - start_pos).abs()
 
 func _update_debug_label():
-	var pos_text := "none"
-	if _aiming_at_trile or _selecting:
-		pos_text = ("%s" % _last_trixel_position)
-		pos_text = pos_text.substr(1, pos_text.length() - 2).replace(",", " ")
-	debug_label.text = "Hovering: %s" % pos_text
+	debug_label.text = get_debug_text()
 
 func _reload_aimed_trile_pos():
-	var cast_result = _cast_mouse_in_trile()
-	_aiming_at_trile = (cast_result != null)
+	var cast_result := _cast_mouse_in_trile()
+	_aiming_at_trile = is_raycast_hit_valid(cast_result)
+	
 	if not _aiming_at_trile: return
 	
 	var position : Vector3i = cast_result.position
 	var normal := Trile.get_face_normal(cast_result.face)
 	
-	var should_offset : bool = mode == Mode.PLACING
-	var offset_within_bounds := trile_editor.trile.contains_trixel_pos(position + normal)
-	var within_bounds := trile_editor.trile.contains_trixel_pos(position)
-	
-	if (should_offset and offset_within_bounds) or not within_bounds: 
+	if should_offset_raycast_hit(cast_result): 
 		position += normal
 	
 	_last_trixel_position = position
 
-func _cast_mouse_in_trile() -> Variant:
+
+func _cast_mouse_in_trile() -> TrixelRaycaster.Result:
 	var camera := get_viewport().get_camera_3d()
 	var start_pos := camera.project_position(_current_mouse_position, 0.0)
 	var moved_pos := camera.project_position(_current_mouse_position, 1.0)
@@ -133,6 +120,14 @@ func _execute_selection():
 	if not _selecting: return
 	var start := _selection_start_trixel_pos
 	var end := _last_trixel_position
-	trile_editor.fill(start, end, mode == Mode.PLACING)
+	trile_editor.fill(start, end, mode == Mode.PRIMARY)
 	trile_editor._rebuild_mesh()
 	_selecting = false
+
+
+# functions to overload
+func get_debug_text() -> String: return ""
+func on_start_selection(): pass
+func on_end_selection(): pass
+func is_raycast_hit_valid(_hit : TrixelRaycaster.Result) -> bool: return false
+func should_offset_raycast_hit(_hit : TrixelRaycaster.Result) -> bool: return false

@@ -1,7 +1,15 @@
 class_name TrixelRaycaster
 
-static func cast_in_trile_space(trile : Trile, start : Vector3, dir : Vector3):
+class Result:
+	var hit_trixel : bool
+	var hit_wall : bool
+	var face : Trile.Face
+	var position : Vector3i
+
+static func cast_in_trile_space(trile : Trile, start : Vector3, dir : Vector3) -> Result:
 	const BUMP_EPSILON := 0.001
+	
+	var result := Result.new()
 	
 	var bounds_hit = try_hit_trixel_bounds(trile, start, dir)
 	if bounds_hit == null: return null
@@ -42,11 +50,12 @@ static func cast_in_trile_space(trile : Trile, start : Vector3, dir : Vector3):
 		current_position = bumped_position + dir * magnitude_to_next_trixel
 		first_step = false
 	
-	return {
-		hit_trixel = did_hit_trixel,
-		face = Trile.face_from_normal(last_trixelpos - current_trixelpos),
-		position = current_trixelpos,
-	}
+	result.hit_trixel = did_hit_trixel
+	result.hit_wall = did_hit_wall
+	result.face = Trile.face_from_normal(last_trixelpos - current_trixelpos)
+	result.position = current_trixelpos
+	
+	return result
 
 
 static func try_hit_trixel_bounds(
