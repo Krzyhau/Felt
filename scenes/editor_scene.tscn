@@ -2,8 +2,8 @@
 
 [ext_resource type="Shader" path="res://graphics/shaders/boundaries.gdshader" id="1_fbdyu"]
 [ext_resource type="Script" path="res://scripts/orbiting_camera.gd" id="1_h65aw"]
-[ext_resource type="Script" path="res://scripts/trixel_editor.gd" id="2_lpmdn"]
-[ext_resource type="Script" path="res://scripts/trixel_materializer.gd" id="4_oiibr"]
+[ext_resource type="Script" path="res://scripts/trile_editor.gd" id="2_lpmdn"]
+[ext_resource type="Script" path="res://scripts/trile_materializer.gd" id="4_oiibr"]
 [ext_resource type="Shader" path="res://graphics/shaders/trixel_texture_projection.gdshader" id="4_utqbi"]
 [ext_resource type="Shader" path="res://graphics/shaders/vignette.gdshader" id="5_847bu"]
 [ext_resource type="Texture2D" uid="uid://krcx6hbfgc0q" path="res://graphics/debug_trixel_texture.png" id="5_yqlrp"]
@@ -82,21 +82,21 @@ transition_time = 0.2
 [node name="camera3d" type="Camera3D" parent="orbiting_camera"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2)
 
-[node name="trixels_editor" type="Node3D" parent="."]
+[node name="trile_editor" type="Node3D" parent="."]
 script = ExtResource("2_lpmdn")
 
-[node name="boundaries" type="MeshInstance3D" parent="trixels_editor"]
+[node name="boundaries" type="MeshInstance3D" parent="trile_editor"]
 mesh = SubResource("BoxMesh_3cab4")
 skeleton = NodePath("../..")
 surface_material_override/0 = SubResource("ShaderMaterial_5bqro")
 
-[node name="trixel_materializer" type="CSGMesh3D" parent="trixels_editor"]
+[node name="materializer" type="CSGMesh3D" parent="trile_editor"]
 material = SubResource("ShaderMaterial_x3mgd")
 script = ExtResource("4_oiibr")
 
-[node name="trixel_tool" type="Node3D" parent="." node_paths=PackedStringArray("trixel_editor", "debug_label", "place_button", "erase_button")]
+[node name="trixel_tool" type="Node3D" parent="." node_paths=PackedStringArray("trile_editor", "debug_label", "place_button", "erase_button")]
 script = ExtResource("8_ibxg4")
-trixel_editor = NodePath("../trixels_editor")
+trile_editor = NodePath("../trile_editor")
 debug_label = NodePath("../interface/hover_pos_label")
 place_button = NodePath("../interface/tools_buttons/trixel_place_button")
 erase_button = NodePath("../interface/tools_buttons/trixel_erase_button")

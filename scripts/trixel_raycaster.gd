@@ -1,18 +1,17 @@
 class_name TrixelRaycaster
 
-
-static func cast(trixels : TrixelContainer, start : Vector3, dir : Vector3):
+static func cast(trile : Trile, start : Vector3, dir : Vector3):
 	var cast_result := {
 		hit_trixel = false,
-		face = TrixelContainer.Face.TOP,
+		face = Trile.Face.TOP,
 		position = Vector3i(0,0,0),
 	}
 	
-	var bounds_hit = try_hit_trixel_bounds(trixels, start, dir)
+	var bounds_hit = try_hit_trile_bounds(trile, start, dir)
 	if bounds_hit == null: return null
 	var bounds_hit_pos : Vector3 = bounds_hit
 	
-	var bounds := trixels.trixel_bounds
+	var bounds := trile.trixel_bounds
 	var max_iterations := bounds.x + bounds.y + bounds.z + 3
 	var current_position := bounds_hit_pos
 	for i in max_iterations:
@@ -29,37 +28,37 @@ static func cast(trixels : TrixelContainer, start : Vector3, dir : Vector3):
 			return null
 		
 		var trixelpos := floor(bumped_position) as Vector3i
-		var hit_wall := not trixels.is_within_bounds(trixelpos)
+		var hit_wall := not trile.contains_trixel_pos(trixelpos)
 		
 		if hit_wall:
 			cast_result.hit_trixel = true
 			cast_result.position = trixelpos
 			
-			if trixelpos.x < 0: cast_result.face = TrixelContainer.Face.RIGHT
-			elif trixelpos.y < 0: cast_result.face = TrixelContainer.Face.TOP
-			elif trixelpos.z < 0: cast_result.face = TrixelContainer.Face.FRONT
-			elif trixelpos.x >= bounds.x: cast_result.face = TrixelContainer.Face.LEFT
-			elif trixelpos.y >= bounds.y: cast_result.face = TrixelContainer.Face.BOTTOM
-			elif trixelpos.z >= bounds.z: cast_result.face = TrixelContainer.Face.BACK
+			if trixelpos.x < 0: cast_result.face = Trile.Face.RIGHT
+			elif trixelpos.y < 0: cast_result.face = Trile.Face.TOP
+			elif trixelpos.z < 0: cast_result.face = Trile.Face.FRONT
+			elif trixelpos.x >= bounds.x: cast_result.face = Trile.Face.LEFT
+			elif trixelpos.y >= bounds.y: cast_result.face = Trile.Face.BOTTOM
+			elif trixelpos.z >= bounds.z: cast_result.face = Trile.Face.BACK
 			
 			return cast_result
 		
-		var trixel_index := trixelpos.x + trixelpos.y*trixels.y_index + trixelpos.z*trixels.z_index
-		var trixel_state := trixels.buffer[trixel_index]
+		var trixel_index := trixelpos.x + trixelpos.y*trile.y_index + trixelpos.z*trile.z_index
+		var trixel_state := trile.buffer[trixel_index]
 		if trixel_state:
 			cast_result.hit_trixel = true
 			cast_result.position = trixelpos
 			
 			var furthest_wall_index := next_trixel_distances.max_axis_index()
 			if furthest_wall_index == Vector3.AXIS_X:
-				if dir.x > 0: cast_result.face = TrixelContainer.Face.LEFT
-				else: cast_result.face = TrixelContainer.Face.RIGHT
+				if dir.x > 0: cast_result.face = Trile.Face.LEFT
+				else: cast_result.face = Trile.Face.RIGHT
 			elif furthest_wall_index == Vector3.AXIS_Y:
-				if dir.y > 0: cast_result.face = TrixelContainer.Face.BOTTOM
-				else: cast_result.face = TrixelContainer.Face.TOP
+				if dir.y > 0: cast_result.face = Trile.Face.BOTTOM
+				else: cast_result.face = Trile.Face.TOP
 			elif furthest_wall_index == Vector3.AXIS_Z:
-				if dir.z > 0: cast_result.face = TrixelContainer.Face.BACK
-				else: cast_result.face = TrixelContainer.Face.FRONT
+				if dir.z > 0: cast_result.face = Trile.Face.BACK
+				else: cast_result.face = Trile.Face.FRONT
 			
 			return cast_result
 		
@@ -68,8 +67,8 @@ static func cast(trixels : TrixelContainer, start : Vector3, dir : Vector3):
 	return cast_result
 
 
-static func try_hit_trixel_bounds(
-	trixels : TrixelContainer, start : Vector3, dir : Vector3
+static func try_hit_trile_bounds(
+	trile : Trile, start : Vector3, dir : Vector3
 ):
 	const arbitrarily_large_number := 1000000.0
 	dir = dir.normalized()
@@ -79,8 +78,8 @@ static func try_hit_trixel_bounds(
 	var smallest_exit_dist := INF
 	
 	for face in 6:
-		var plane_normal := TrixelContainer.get_face_normal(face) as Vector3
-		var plane_dist_vec := plane_normal * (trixels.trixel_bounds as Vector3)
+		var plane_normal := Trile.get_face_normal(face) as Vector3
+		var plane_dist_vec := plane_normal * (trile.trixel_bounds as Vector3)
 		var plane_dist := maxf(0.0, plane_dist_vec.x + plane_dist_vec.y + plane_dist_vec.z)
 		
 		var start_dist = plane_normal.dot(start) - plane_dist

@@ -1,24 +1,26 @@
-class_name TrixelContainer extends Resource
+class_name Trile extends Resource
 
-const DEFAULT_TRIXELS_PER_TRILE = 16
-const DEFAULT_TRILE_SIZE = Vector3i.ONE
+enum Face {FRONT, BACK, TOP, BOTTOM, LEFT, RIGHT}
 
-var trixels_per_trile : int
-var trile_size : Vector3i
-var trixel_bounds : Vector3i
-var trixels_count : int
+const DEFAULT_RESOLUTION = 16
+const DEFAULT_SIZE = Vector3i.ONE
+
+var resolution : int # how many trixels within a trile unit
+var size : Vector3i # the size of a trile, in units
+var trixel_bounds : Vector3i # the size of a trile, in trixels
+var trixels_count : int # the number of triles stored in this trile
 
 var y_index : int
 var z_index : int
 
 var buffer : PackedByteArray
 
-func initialize_data_buffer():
+func _initialize_data_buffer():
 	buffer = PackedByteArray()
 	buffer.resize(trixels_count)
 
 func _recalculate_constants():
-	trixel_bounds = trile_size * trixels_per_trile
+	trixel_bounds = size * resolution
 	trixels_count = trixel_bounds.x * trixel_bounds.y * trixel_bounds.z
 	y_index = trixel_bounds.x
 	z_index = trixel_bounds.x * trixel_bounds.y
@@ -27,20 +29,20 @@ func get_trixel_width_along_axis(axis : Vector3i) -> int:
 	var axis_size := trixel_bounds * axis
 	return abs(axis_size.x + axis_size.y + axis_size.z)
 
-func is_within_bounds(pos : Vector3i) -> bool:
+func contains_trixel_pos(pos : Vector3i) -> bool:
 	return pos.x >= 0 and pos.x < trixel_bounds.x \
 	and pos.y >= 0 and pos.y < trixel_bounds.y \
 	and pos.z >= 0 and pos.z < trixel_bounds.z
 
 func get_trixel(pos : Vector3i) -> bool:
-	if not is_within_bounds(pos): return false
+	if not contains_trixel_pos(pos): return false
 	else: return buffer[pos.x + pos.y*y_index + pos.z*z_index] != null
 	
 func get_adjacent_trixel(pos : Vector3i, face : Face) -> bool:
-	return get_trixel(pos + TrixelContainer.get_face_normal(face))
+	return get_trixel(pos + Trile.get_face_normal(face))
 
 func is_trixel_face_solid(pos : Vector3i, face : Face) -> bool:
-	return get_trixel(pos) and not get_trixel(pos + TrixelContainer.get_face_normal(face))
+	return get_trixel(pos) and not get_trixel(pos + Trile.get_face_normal(face))
 
 func set_trixel(pos : Vector3i, state : bool):
 	if pos.x >= 0 and pos.x < trixel_bounds.x \
@@ -63,16 +65,20 @@ func fill_trixels(mins : Vector3i, maxs : Vector3i, state : bool):
 		buffer[x + y*y_index + z*z_index] = 1 if state else 0
 
 func initialize_trile(
-	size : Vector3i = DEFAULT_TRILE_SIZE, 
-	resolution : int = DEFAULT_TRIXELS_PER_TRILE
+	trile_size : Vector3i = DEFAULT_SIZE, 
+	trile_resolution : int = DEFAULT_RESOLUTION
 ):
-	trile_size = size
-	trixels_per_trile = resolution
+	size = trile_size
+	resolution = trile_resolution
 	_recalculate_constants()
-	initialize_data_buffer()
+	_initialize_data_buffer()
 
+func trixel_to_local(trixel_pos : Vector3) -> Vector3:
+	return (trixel_pos / resolution) - (size as Vector3) / 2.0
 
-enum Face {FRONT, BACK, TOP, BOTTOM, LEFT, RIGHT}
+func local_to_trixel(local_pos : Vector3) -> Vector3:
+	return (local_pos + (size as Vector3) / 2.0) * resolution
+
 
 static func get_face_normal(face : Face) -> Vector3i:
 	const normal_lookup := [

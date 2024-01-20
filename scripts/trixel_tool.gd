@@ -2,7 +2,7 @@ class_name TrixelTool extends Node
 
 enum Mode {NONE, PLACING, ERASING}
 
-@export var trixel_editor : TrixelEditor
+@export var trile_editor : TrileEditor
 @export var debug_label : Label
 @export var place_button : Button
 @export var erase_button : Button
@@ -75,8 +75,8 @@ func _update_cursor():
 	material.albedo_color = color_placing if mode == Mode.PLACING else color_erasing
 	material.emission = material.albedo_color
 	
-	var start_pos := trixel_editor.get_trixel_to_global(_last_trixel_position)
-	var end_pos := trixel_editor.get_trixel_to_global(_selection_start_trixel_pos)
+	var start_pos := trile_editor.get_trixel_to_global(_last_trixel_position)
+	var end_pos := trile_editor.get_trixel_to_global(_selection_start_trixel_pos)
 	if not _selecting: end_pos = start_pos
 	
 	self.global_position = Vector3(
@@ -84,7 +84,7 @@ func _update_cursor():
 		minf(start_pos.y, end_pos.y) - cursor_oversize,
 		minf(start_pos.z, end_pos.z) - cursor_oversize,
 	)
-	var min_size := Vector3.ONE / trixel_editor.trixels.trixels_per_trile
+	var min_size := Vector3.ONE / trile_editor.trile.resolution
 	var oversize_scale := Vector3.ONE * cursor_oversize * 2.0
 	self.scale = min_size + oversize_scale + (end_pos - start_pos).abs()
 
@@ -104,11 +104,11 @@ func _reload_aimed_trile_pos():
 	if not _aiming_at_trile: return
 	
 	var position : Vector3i = cast_result.position
-	var normal := TrixelContainer.get_face_normal(cast_result.face)
+	var normal := Trile.get_face_normal(cast_result.face)
 	
 	var should_offset : bool = mode == Mode.PLACING or not cast_result.hit_trixel
-	var offset_within_bounds := trixel_editor.trixels.is_within_bounds(position + normal)
-	var within_bounds := trixel_editor.trixels.is_within_bounds(position)
+	var offset_within_bounds := trile_editor.trile.contains_trixel_pos(position + normal)
+	var within_bounds := trile_editor.trile.contains_trixel_pos(position)
 	
 	if (should_offset and offset_within_bounds) or not within_bounds: 
 		position += normal
@@ -120,12 +120,12 @@ func _cast_mouse_in_trile() -> Variant:
 	var start_pos := camera.project_position(_current_mouse_position, 0.0)
 	var moved_pos := camera.project_position(_current_mouse_position, 1.0)
 	
-	start_pos = trixel_editor.get_global_to_trixel(start_pos)
-	moved_pos = trixel_editor.get_global_to_trixel(moved_pos)
+	start_pos = trile_editor.get_global_to_trixel(start_pos)
+	moved_pos = trile_editor.get_global_to_trixel(moved_pos)
 	
 	var dir := (moved_pos - start_pos).normalized()
 	
-	return TrixelRaycaster.cast(trixel_editor.trixels, start_pos, dir)
+	return TrixelRaycaster.cast(trile_editor.trile, start_pos, dir)
 
 func _start_selection():
 	if not _aiming_at_trile: return
@@ -136,6 +136,6 @@ func _execute_selection():
 	if not _selecting: return
 	var start := _selection_start_trixel_pos
 	var end := _last_trixel_position
-	trixel_editor.fill(start, end, mode == Mode.PLACING)
-	trixel_editor._rebuild_mesh()
+	trile_editor.fill(start, end, mode == Mode.PLACING)
+	trile_editor._rebuild_mesh()
 	_selecting = false
