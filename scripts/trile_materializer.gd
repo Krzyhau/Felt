@@ -1,23 +1,51 @@
-class_name TrileMaterializer extends CSGMesh3D
+class_name TrileMaterializer extends Resource
 
-signal materialized(trile : Trile, interrupted : bool)
+signal materialized(trile : Trile, mesh_data : Array, interrupted : bool)
 
 var _generation_thread : Thread
 var _generation_mutex : Mutex = Mutex.new()
 var _generation_stopped: bool = false
-var mesh_data : Array
+var _mesh_data : Array
 
 var _trile : Trile
+
+func _init(trile : Trile):
+	_trile = trile
+
+func materialize():
+	interrupt_if_active()
+	
+	_generation_stopped = false
+	_generation_thread = Thread.new()
+	_generation_thread.start(_generate_mesh)
+
+func interrupt_if_active():
+	if _generation_thread:
+		_generation_mutex.lock()
+		_generation_stopped = true
+		_generation_mutex.unlock()
+		_generation_thread.wait_to_finish()
+
+func is_materializing() -> bool:
+	return _generation_thread and _generation_thread.is_alive()
+	
+func _should_stop() -> bool:
+	_generation_mutex.lock()
+	var should_stop := _generation_stopped
+	_generation_mutex.unlock()
+	return should_stop
+
+
 
 func _generate_mesh():
 	var gen_start_time = Time.get_ticks_usec()
 	
-	mesh_data = []
-	mesh_data.resize(Mesh.ARRAY_MAX)
-	mesh_data[Mesh.ARRAY_VERTEX] = PackedVector3Array()
-	mesh_data[Mesh.ARRAY_TEX_UV] = PackedVector2Array()
+	_mesh_data = []
+	_mesh_data.resize(Mesh.ARRAY_MAX)
+	_mesh_data[Mesh.ARRAY_VERTEX] = PackedVector3Array()
+	_mesh_data[Mesh.ARRAY_TEX_UV] = PackedVector2Array()
 	
-	_generate_mesh_data(mesh_data)
+	_generate_mesh_data(_mesh_data)
 	var interrupted = _should_stop()
 	
 	var gen_end_time = Time.get_ticks_usec()
@@ -29,12 +57,7 @@ func _generate_mesh():
 	call_deferred("_on_materialized", interrupted)
 
 func _on_materialized(interrupted : bool):
-	if not interrupted:
-		mesh = ArrayMesh.new()
-		var has_vertices := len(mesh_data[Mesh.ARRAY_VERTEX]) != 0
-		if has_vertices:
-			mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, mesh_data)
-	materialized.emit(_trile, interrupted)
+	materialized.emit(_trile, _mesh_data, interrupted)
 
 func _generate_mesh_data(mesh_arrays : Array):
 	for face in 6:
@@ -168,29 +191,7 @@ func _add_plane_to_mesh(
 		mesh_arrays[Mesh.ARRAY_VERTEX].push_back(face_vertices[i])
 		mesh_arrays[Mesh.ARRAY_TEX_UV].push_back(uvs[i])
 
-func _should_stop() -> bool:
-	_generation_mutex.lock()
-	var should_stop := _generation_stopped
-	_generation_mutex.unlock()
-	return should_stop
 
 
-func materialize(trile : Trile):
-	_trile = trile
-	
-	interrupt_if_active()
-	
-	_generation_stopped = false
-	_generation_thread = Thread.new()
-	_generation_thread.start(_generate_mesh)
 
-func interrupt_if_active():
-	if _generation_thread:
-		_generation_mutex.lock()
-		_generation_stopped = true
-		_generation_mutex.unlock()
-		_generation_thread.wait_to_finish()
-
-func is_materializing() -> bool:
-	return _generation_thread and _generation_thread.is_alive()
 

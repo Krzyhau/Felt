@@ -1,4 +1,4 @@
-class_name Trile extends Resource
+class_name Trile extends ArrayMesh
 
 enum Face {FRONT, BACK, TOP, BOTTOM, LEFT, RIGHT}
 
@@ -14,6 +14,20 @@ var y_index : int
 var z_index : int
 
 var buffer : PackedByteArray
+var materializer : TrileMaterializer
+var cubemap : TrileCubemap
+var material : ShaderMaterial
+
+func _init(
+	trile_size : Vector3i = DEFAULT_SIZE, 
+	trile_resolution : int = DEFAULT_RESOLUTION
+):
+	size = trile_size
+	resolution = trile_resolution
+	_recalculate_constants()
+	_initialize_data_buffer()
+	_create_materializer()
+	_initialize_material()
 
 func _initialize_data_buffer():
 	buffer = PackedByteArray()
@@ -24,6 +38,28 @@ func _recalculate_constants():
 	trixels_count = trixel_bounds.x * trixel_bounds.y * trixel_bounds.z
 	y_index = trixel_bounds.x
 	z_index = trixel_bounds.x * trixel_bounds.y
+	
+func _create_materializer():
+	materializer = TrileMaterializer.new(self)
+	materializer.materialized.connect(_on_materialized)
+
+func _on_materialized(_trile : Trile, mesh_data : Array, _interrupted : bool):
+	if _interrupted: return
+	
+	clear_surfaces()
+	var has_vertices := len(mesh_data[Mesh.ARRAY_VERTEX]) != 0
+	if has_vertices:
+		add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, mesh_data)
+		surface_set_material(0, material)
+
+func _initialize_material():
+	material = ShaderMaterial.new()
+	material.shader = preload("res://graphics/shaders/trixel_texture_projection.gdshader")
+	var texture = preload("res://graphics/debug_trixel_texture.png")
+	material.set_shader_parameter("TEXTURE", texture)
+
+func rebuild_mesh():
+	materializer.materialize()
 
 func get_trixel_width_along_axis(axis : Vector3i) -> int:
 	var axis_size := trixel_bounds * axis
@@ -64,21 +100,11 @@ func fill_trixels(mins : Vector3i, maxs : Vector3i, state : bool):
 	for x in range_x: for y in range_y: for z in range_z:
 		buffer[x + y*y_index + z*z_index] = 1 if state else 0
 
-func initialize_trile(
-	trile_size : Vector3i = DEFAULT_SIZE, 
-	trile_resolution : int = DEFAULT_RESOLUTION
-):
-	size = trile_size
-	resolution = trile_resolution
-	_recalculate_constants()
-	_initialize_data_buffer()
-
 func trixel_to_local(trixel_pos : Vector3) -> Vector3:
 	return (trixel_pos / resolution) - (size as Vector3) / 2.0
 
 func local_to_trixel(local_pos : Vector3) -> Vector3:
 	return (local_pos + (size as Vector3) / 2.0) * resolution
-
 
 static func get_face_normal(face : Face) -> Vector3i:
 	const normal_lookup := [

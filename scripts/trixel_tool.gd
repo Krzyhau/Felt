@@ -121,7 +121,7 @@ func _execute_selection():
 	var start := _selection_start_trixel_pos
 	var end := _last_trixel_position
 	trile_editor.fill(start, end, mode == Mode.PRIMARY)
-	trile_editor._rebuild_mesh()
+	trile_editor.trile.rebuild_mesh()
 	_selecting = false
 
 
