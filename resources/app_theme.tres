@@ -6,7 +6,7 @@
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_g1cie"]
 bg_color = Color(0.25098, 0.25098, 0.25098, 0.501961)
-corner_radius_top_left = 9
+corner_radius_top_left = 8
 corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
