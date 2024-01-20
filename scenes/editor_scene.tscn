@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3 uid="uid://bu7kws1bt3n66"]
+[gd_scene load_steps=21 format=3 uid="uid://bu7kws1bt3n66"]
 
 [ext_resource type="Shader" path="res://graphics/shaders/boundaries.gdshader" id="1_fbdyu"]
 [ext_resource type="Script" path="res://scripts/orbiting_camera.gd" id="1_h65aw"]
@@ -9,6 +9,7 @@
 [ext_resource type="Texture2D" uid="uid://krcx6hbfgc0q" path="res://graphics/debug_trixel_texture.png" id="5_yqlrp"]
 [ext_resource type="Script" path="res://scripts/trixel_tool.gd" id="8_ibxg4"]
 [ext_resource type="FontFile" uid="uid://bvsruta6u47fy" path="res://resources/fonts/righteous.ttf" id="9_g152l"]
+[ext_resource type="Script" path="res://scripts/ui_mouse_zone.gd" id="9_ohhbn"]
 [ext_resource type="Theme" uid="uid://cmydy5fbx3efb" path="res://resources/app_theme.tres" id="10_33n0x"]
 
 [sub_resource type="Environment" id="Environment_x2nqc"]
@@ -117,6 +118,15 @@ grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("10_33n0x")
 
+[node name="mouse_input_catcher" type="Control" parent="interface"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("9_ohhbn")
+
 [node name="vignette_overlay" type="ColorRect" parent="interface"]
 material = SubResource("ShaderMaterial_xl74c")
 layout_mode = 1
@@ -125,6 +135,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 
 [node name="hover_pos_label" type="Label" parent="interface"]
 layout_mode = 1
@@ -144,10 +155,11 @@ layout_mode = 1
 anchors_preset = 4
 anchor_top = 0.5
 anchor_bottom = 0.5
-offset_top = -232.0
+offset_top = -260.0
 offset_right = 80.0
-offset_bottom = 232.0
+offset_bottom = 220.0
 grow_vertical = 2
+mouse_filter = 0
 
 [node name="select_button" type="Button" parent="interface/tools_buttons"]
 custom_minimum_size = Vector2(64, 64)
@@ -243,7 +255,3 @@ offset_bottom = 15.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-
-[node name="padding3" type="Control" parent="interface/tools_buttons"]
-custom_minimum_size = Vector2(0, 16)
-layout_mode = 2

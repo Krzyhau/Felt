@@ -40,7 +40,7 @@ func _input_mouse_actions(event):
 	if event is InputEventMouseMotion:
 		_current_mouse_position = event.position
 	if event is InputEventMouseButton and event.button_index == 1:
-		if event.pressed: _start_selection()
+		if event.pressed and UIMouseZone.is_mouse_over: _start_selection()
 		else: _execute_selection()
 
 func _input_handle_mode_switching():
