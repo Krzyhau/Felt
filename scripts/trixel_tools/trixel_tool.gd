@@ -15,8 +15,10 @@ var mode : Mode
 var _current_mouse_position : Vector2
 
 var _selecting : bool
-var _selection_start_trixel_pos : Vector3i
+var _use_selection_resizing : bool
 var _last_trixel_position : Vector3i
+var _last_trixel_face : Trile.Face
+var _selection_start_trixel_pos : Vector3i
 var _aiming_at_trile : bool
 
 func _ready():
@@ -24,6 +26,7 @@ func _ready():
 	secondary_action_button.toggled.connect(_on_buttons_toggled)
 	
 	debug_label.text = ""
+	_use_selection_resizing = true
 
 func _on_buttons_toggled(_b):
 	if primary_action_button.button_pressed: mode = Mode.PRIMARY
@@ -70,7 +73,7 @@ func _update_cursor():
 	
 	var start_pos := trile_editor.get_trixel_to_global(_last_trixel_position)
 	var end_pos := trile_editor.get_trixel_to_global(_selection_start_trixel_pos)
-	if not _selecting: end_pos = start_pos
+	if not _selecting or not _use_selection_resizing: end_pos = start_pos
 	
 	self.global_position = Vector3(
 		minf(start_pos.x, end_pos.x) - cursor_oversize,
@@ -80,6 +83,8 @@ func _update_cursor():
 	var min_size := Vector3.ONE / trile_editor.trile.resolution
 	var oversize_scale := Vector3.ONE * cursor_oversize * 2.0
 	self.scale = min_size + oversize_scale + (end_pos - start_pos).abs()
+	
+	cursor.rotation_degrees = Trile.get_face_rotation_degrees(_last_trixel_face)
 
 func _update_debug_label():
 	debug_label.text = get_debug_text()
@@ -97,6 +102,7 @@ func _reload_aimed_trile_pos():
 		position += normal
 	
 	_last_trixel_position = position
+	_last_trixel_face = cast_result.face
 
 
 func _cast_mouse_in_trile() -> TrixelRaycaster.Result:
@@ -112,16 +118,14 @@ func _cast_mouse_in_trile() -> TrixelRaycaster.Result:
 	return TrixelRaycaster.cast_in_trile_space(trile_editor.trile, start_pos, dir)
 
 func _start_selection():
-	if not _aiming_at_trile: return
+	if not _aiming_at_trile or _selecting: return
 	_selecting = true
 	_selection_start_trixel_pos = _last_trixel_position
+	on_selection_started()
 
 func _execute_selection():
 	if not _selecting: return
-	var start := _selection_start_trixel_pos
-	var end := _last_trixel_position
-	trile_editor.fill(start, end, mode == Mode.PRIMARY)
-	trile_editor.trile.rebuild_mesh()
+	on_selection_finalized()
 	_selecting = false
 
 
@@ -131,3 +135,5 @@ func on_start_selection(): pass
 func on_end_selection(): pass
 func is_raycast_hit_valid(_hit : TrixelRaycaster.Result) -> bool: return false
 func should_offset_raycast_hit(_hit : TrixelRaycaster.Result) -> bool: return false
+func on_selection_started(): pass
+func on_selection_finalized(): pass

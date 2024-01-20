@@ -27,18 +27,26 @@ func _create_csg_filler(mins : Vector3, maxs : Vector3, state : bool):
 	
 	box.scale = region_size / trile.resolution
 	box.position = region_midpoint / trile.resolution - Vector3.ONE * (trile.size / 2.0)
-	
 	box.operation = CSGShape3D.OPERATION_UNION if state else CSGShape3D.OPERATION_SUBTRACTION
-	
-	var material := trile.material.duplicate(true) as ShaderMaterial
-	material.set_shader_parameter("calculate_projection", true)
-	material.set_shader_parameter("inner_faces", not state)
-	material.set_shader_parameter("size", region_size / trile.size_in_trixels)
-	material.set_shader_parameter("offset", region_midpoint / trile.size_in_trixels)
-	box.material = material
+
+	box.material = _create_material_for_csg_filler(box)
 	
 	mesh_node.add_child(box)
 	temporary_csg_fillers.append(box)
+
+func _create_material_for_csg_filler(box : CSGBox3D) -> ShaderMaterial:
+	var inner_faces := box.operation == CSGShape3D.OPERATION_SUBTRACTION
+	var size := box.scale / trile.size
+	var offset := (box.position / trile.size) + Vector3.ONE * 0.5
+	
+	var material := ShaderMaterial.new()
+	material.shader = trile.material.shader
+	material.set_shader_parameter("TEXTURE", trile.cubemap)
+	material.set_shader_parameter("calculate_projection", true)
+	material.set_shader_parameter("inner_faces", inner_faces)
+	material.set_shader_parameter("size", size)
+	material.set_shader_parameter("offset", offset)
+	return material
 
 func _clear_csg_fillers():
 	for filler in temporary_csg_fillers:
@@ -70,6 +78,8 @@ func fill(corner1 : Vector3i, corner2 : Vector3i, state: bool):
 	trile.fill_trixels(smallest, largest, state)
 	_create_csg_filler(smallest, largest, state)
 
+func paint(pos : Vector3i, face : Trile.Face, color : Color):
+	trile.cubemap.paint(pos, face, color)
 
 func get_global_to_trixel(global_pos : Vector3) -> Vector3:
 	return trile.local_to_trixel(self.to_local(global_pos))

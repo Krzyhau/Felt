@@ -26,8 +26,8 @@ func _init(
 	resolution = trile_resolution
 	_recalculate_constants()
 	_initialize_data_buffer()
+	_initialize_cubemap_and_material()
 	_create_materializer()
-	_initialize_material()
 
 func _initialize_data_buffer():
 	buffer = PackedByteArray()
@@ -38,6 +38,13 @@ func _recalculate_constants():
 	trixels_count = size_in_trixels * size_in_trixels * size_in_trixels 
 	y_index = size_in_trixels
 	z_index = size_in_trixels * size_in_trixels
+
+
+func _initialize_cubemap_and_material():
+	cubemap = TrileCubemap.new(self)
+	material = ShaderMaterial.new()
+	material.shader = preload("res://graphics/shaders/trixel_texture_projection.gdshader")
+	material.set_shader_parameter("TEXTURE", cubemap)
 
 func _create_materializer():
 	materializer = TrileMaterializer.new(self)
@@ -51,12 +58,6 @@ func _on_materialized(_trile : Trile, mesh_data : Array, _interrupted : bool):
 	if has_vertices:
 		add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, mesh_data)
 		surface_set_material(0, material)
-
-func _initialize_material():
-	material = ShaderMaterial.new()
-	material.shader = preload("res://graphics/shaders/trixel_texture_projection.gdshader")
-	var texture = preload("res://graphics/debug_trixel_texture.png")
-	material.set_shader_parameter("TEXTURE", texture)
 
 func rebuild_mesh():
 	materializer.materialize()
@@ -149,3 +150,20 @@ static func face_from_normal(vec : Vector3i) -> Face:
 	if face_index >= 0 and face_index <= 6: 
 		return face_lookup[face_index]
 	else: return Face.TOP
+	
+static func get_face_name(face : Face) -> String:
+	const name_lookup := [
+		"Front", "Back", "Top", "bottom", "Left", "Right"
+	]
+	return name_lookup[face]
+
+static func get_face_rotation_degrees(face : Face) -> Vector3:
+	const rotation_lookup := [
+		Vector3(0,0,0),   # Face.FRONT
+		Vector3(0,180,0),   # Face.BACK
+		Vector3(-90,0,0),   # Face.TOP
+		Vector3(90,0,0),   # Face.BOTTOM
+		Vector3(0,270,0),   # Face.LEFT
+		Vector3(0,90,0),   # Face.RIGHT
+	]
+	return rotation_lookup[face]

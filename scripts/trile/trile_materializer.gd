@@ -168,7 +168,7 @@ func _add_plane_to_mesh(
 	
 	var uvs := []
 	for i in 4:
-		uvs.push_back(TrileCubemap.trixel_coords_to_uv(face_vertices[i], face, _trile))
+		uvs.push_back(_trile.cubemap.trile_coords_to_uv(face_vertices[i], face))
 	
 	# this check is a result of using abs on tangent vectors
 	const indices_clockwise := [2,1,0,0,3,2]

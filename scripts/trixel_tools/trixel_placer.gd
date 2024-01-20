@@ -1,4 +1,4 @@
-class_name TrixelPlacer extends "res://scripts/trixel_tool.gd"
+class_name TrixelPlacer extends TrixelTool
 
 func _process(delta: float) -> void:
 	super(delta)
@@ -8,12 +8,12 @@ func _process(delta: float) -> void:
 	
 
 func _update_placer_cursor():
-	var material : StandardMaterial3D = cursor.get_surface_override_material(0)
+	var cursor_material = cursor.get_surface_override_material(0)
 	const color_placing := Color(0.0,0.0,1.0,0.5)
 	const color_erasing := Color(1.0,0.0,0.0,0.5)
-	material.albedo_color = color_placing if mode == Mode.PRIMARY else color_erasing
-	material.emission = material.albedo_color
-
+	cursor_material.albedo_color = color_placing if mode == Mode.PRIMARY else color_erasing
+	cursor_material.emission = cursor_material.albedo_color
+	
 
 
 # overloaded functions
@@ -35,3 +35,9 @@ func should_offset_raycast_hit(hit : TrixelRaycaster.Result) -> bool:
 	var within_bounds := trile_editor.trile.contains_trixel_pos(hit.position)
 	
 	return (is_placer_tool and offset_within_bounds) or not within_bounds
+	
+func on_selection_finalized():
+	var start := _selection_start_trixel_pos
+	var end := _last_trixel_position
+	trile_editor.fill(start, end, mode == Mode.PRIMARY)
+	trile_editor.trile.rebuild_mesh()
