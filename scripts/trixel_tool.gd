@@ -95,9 +95,6 @@ func _update_debug_label():
 		pos_text = pos_text.substr(1, pos_text.length() - 2).replace(",", " ")
 	debug_label.text = "Hovering: %s" % pos_text
 
-func _update_buttons_focus_states():
-	pass
-
 func _reload_aimed_trile_pos():
 	var cast_result = _cast_mouse_in_trile()
 	_aiming_at_trile = (cast_result != null)
