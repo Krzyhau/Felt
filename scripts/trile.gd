@@ -36,7 +36,7 @@ func contains_trixel_pos(pos : Vector3i) -> bool:
 
 func get_trixel(pos : Vector3i) -> bool:
 	if not contains_trixel_pos(pos): return false
-	else: return buffer[pos.x + pos.y*y_index + pos.z*z_index] != null
+	else: return buffer[pos.x + pos.y*y_index + pos.z*z_index]
 	
 func get_adjacent_trixel(pos : Vector3i, face : Face) -> bool:
 	return get_trixel(pos + Trile.get_face_normal(face))
@@ -112,3 +112,18 @@ static func get_face_cotangent(face : Face) -> Vector3i:
 		Vector3i.UP,      # Face.RIGHT
 	]
 	return cotangent_lookup[face]
+
+static func face_from_normal(vec : Vector3i) -> Face:
+	const face_lookup := [
+		Face.BACK,
+		Face.BOTTOM,
+		Face.LEFT,
+		0,
+		Face.RIGHT,
+		Face.TOP,
+		Face.FRONT,
+	]
+	var face_index = vec.x + vec.y * 2 + vec.z * 3 + 3
+	if face_index >= 0 and face_index <= 6: 
+		return face_lookup[face_index]
+	else: return Face.TOP

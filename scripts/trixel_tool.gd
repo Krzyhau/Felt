@@ -106,7 +106,7 @@ func _reload_aimed_trile_pos():
 	var position : Vector3i = cast_result.position
 	var normal := Trile.get_face_normal(cast_result.face)
 	
-	var should_offset : bool = mode == Mode.PLACING or not cast_result.hit_trixel
+	var should_offset : bool = mode == Mode.PLACING
 	var offset_within_bounds := trile_editor.trile.contains_trixel_pos(position + normal)
 	var within_bounds := trile_editor.trile.contains_trixel_pos(position)
 	
@@ -125,7 +125,7 @@ func _cast_mouse_in_trile() -> Variant:
 	
 	var dir := (moved_pos - start_pos).normalized()
 	
-	return TrixelRaycaster.cast(trile_editor.trile, start_pos, dir)
+	return TrixelRaycaster.cast_in_trile_space(trile_editor.trile, start_pos, dir)
 
 func _start_selection():
 	if not _aiming_at_trile: return
