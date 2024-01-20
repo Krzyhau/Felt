@@ -29,6 +29,7 @@ shader = ExtResource("1_fbdyu")
 [sub_resource type="BoxMesh" id="BoxMesh_s4cgk"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ysn5f"]
+transparency = 1
 
 [sub_resource type="QuadMesh" id="QuadMesh_vps5c"]
 center_offset = Vector3(0, 0, 0.5)
