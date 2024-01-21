@@ -1,5 +1,8 @@
 class_name TrixelPainter extends TrixelTool
 
+@export var primary_color_button : ColorButton
+@export var secondary_color_button : ColorButton
+
 var _painter_cursor_mesh : MeshInstance3D
 var _picker_cursor_mesh : MeshInstance3D
 
@@ -9,13 +12,12 @@ func _ready():
 	_painter_cursor_mesh = cursor.get_child(1)
 	
 	_use_selection_resizing = false
-	
 
 func _process(delta: float):
 	super(delta)
 	if mode == Mode.NONE: return
 	
-	if _selecting: _paint()
+	if _selecting: _perform_action()
 	_update_cursors()
 	_update_painter_cursor()
 
@@ -25,9 +27,23 @@ func _update_cursors():
 
 func _update_painter_cursor():
 	var material := _painter_cursor_mesh.get_surface_override_material(0)
-	const color := Color.RED
-	material.albedo_color = color
+	material.albedo_color = get_painting_color()
 	material.emission = material.albedo_color
+
+func _get_active_color_button() -> ColorButton:
+	if Input.is_action_pressed("tool_alt_action"):
+		return secondary_color_button
+	else:
+		return primary_color_button
+
+func get_painting_color() -> Color:
+	return _get_active_color_button().color
+
+func _perform_action():
+	if mode == TrixelTool.Mode.PRIMARY:
+		_paint()
+	if mode == TrixelTool.Mode.SECONDARY:
+		_pick_color()
 
 func _paint():
 	# raycaster can occasionally "leak" between trixels
@@ -35,8 +51,12 @@ func _paint():
 	var facepos = _last_trixel_position + Trile.get_face_normal(_last_trixel_face)
 	if trile_editor.trile.get_trixel(facepos): return
 	
-	trile_editor.paint(_last_trixel_position, _last_trixel_face, Color.RED)
+	trile_editor.paint(_last_trixel_position, _last_trixel_face, get_painting_color())
 
+func _pick_color():
+	var button_to_change = _get_active_color_button()
+	var color = trile_editor.pick_color(_last_trixel_position, _last_trixel_face)
+	button_to_change.color = color
 
 
 # overloaded functions

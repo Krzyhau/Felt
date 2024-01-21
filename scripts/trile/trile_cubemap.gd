@@ -12,7 +12,7 @@ func _generate_image():
 	var width := _trile.size_in_trixels * 6
 	var height := _trile.size_in_trixels
 	buffer_image = Image.create(width, height, false, Image.FORMAT_RGBA8)
-	buffer_image.fill(Color.WHITE)
+	buffer_image.fill(Color(1.0, 1.0, 1.0, 0.0))
 	set_image(buffer_image)
 
 func paint(position : Vector3i, face : Trile.Face, color : Color):

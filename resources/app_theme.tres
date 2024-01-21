@@ -1,6 +1,16 @@
-[gd_resource type="Theme" load_steps=6 format=3 uid="uid://cmydy5fbx3efb"]
+[gd_resource type="Theme" load_steps=9 format=3 uid="uid://cmydy5fbx3efb"]
 
 [ext_resource type="FontFile" uid="uid://c7adub7gy302x" path="res://resources/fonts/font-awesome-solid.otf" id="1_f4bft"]
+
+[sub_resource type="ImageTexture" id="ImageTexture_fg3b2"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_m2820"]
+bg_color = Color(1, 1, 1, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bhcy0"]
+bg_color = Color(0, 0, 0, 0)
+border_width_top = 8
+border_color = Color(0, 0, 0, 1)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_22wqr"]
 
@@ -26,6 +36,12 @@ corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
 [resource]
+EmissionValueSlider/base_type = &"HSlider"
+EmissionValueSlider/constants/center_grabber = 0
+EmissionValueSlider/constants/grabber_offset = 0
+EmissionValueSlider/icons/grabber = SubResource("ImageTexture_fg3b2")
+EmissionValueSlider/styles/grabber_area = SubResource("StyleBoxFlat_m2820")
+EmissionValueSlider/styles/slider = SubResource("StyleBoxFlat_bhcy0")
 ToolButton/base_type = &"Button"
 ToolButton/font_sizes/font_size = 48
 ToolButton/fonts/font = ExtResource("1_f4bft")

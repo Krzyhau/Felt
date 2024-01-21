@@ -54,7 +54,8 @@ func _input_zooming():
 
 func _input_orbiting(event):
 	if event is InputEventMouseButton:
-		if not UIMouseZone.is_mouse_over or event.button_index != 2: return
+		if event.button_index != 2: return
+		if event.pressed and not UIMouseZone.is_mouse_over: return
 		_orbiting = event.pressed
 		_orbiting_initial_mouse = event.position
 		_orbiting_current_mouse = event.position
@@ -65,7 +66,8 @@ func _input_orbiting(event):
 
 func _input_panning(event):
 	if event is InputEventMouseButton:
-		if not UIMouseZone.is_mouse_over or event.button_index != 3: return
+		if event.button_index != 3: return
+		if event.pressed and not UIMouseZone.is_mouse_over: return
 		_panning = event.pressed
 		_panning_initial_mouse = event.position
 		_panning_current_mouse = event.position

@@ -1,0 +1,32 @@
+[gd_scene load_steps=2 format=3 uid="uid://dqs30efmgthen"]
+
+[ext_resource type="Script" path="res://scripts/ui/color_button.gd" id="1_u3low"]
+
+[node name="color_button1" type="Button"]
+custom_minimum_size = Vector2(48, 38)
+script = ExtResource("1_u3low")
+
+[node name="base_color" type="ColorRect" parent="."]
+custom_minimum_size = Vector2(40, 20)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -15.0
+offset_right = 20.0
+offset_bottom = 5.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="emission_value" type="HSlider" parent="base_color"]
+layout_mode = 0
+offset_top = 22.0
+offset_right = 40.0
+offset_bottom = 30.0
+mouse_filter = 2
+theme_type_variation = &"EmissionValueSlider"
+max_value = 255.0

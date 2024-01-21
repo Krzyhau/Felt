@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3 uid="uid://bu7kws1bt3n66"]
+[gd_scene load_steps=25 format=3 uid="uid://bu7kws1bt3n66"]
 
 [ext_resource type="Shader" path="res://graphics/shaders/boundaries.gdshader" id="1_fbdyu"]
 [ext_resource type="Script" path="res://scripts/orbiting_camera.gd" id="1_h65aw"]
@@ -7,8 +7,10 @@
 [ext_resource type="Shader" path="res://graphics/shaders/vignette.gdshader" id="5_847bu"]
 [ext_resource type="Script" path="res://scripts/trixel_tools/trixel_placer.gd" id="7_nk0l3"]
 [ext_resource type="FontFile" uid="uid://bvsruta6u47fy" path="res://resources/fonts/righteous.ttf" id="9_g152l"]
-[ext_resource type="Script" path="res://scripts/ui_mouse_zone.gd" id="9_ohhbn"]
+[ext_resource type="Script" path="res://scripts/ui/ui_mouse_zone.gd" id="9_ohhbn"]
 [ext_resource type="Theme" uid="uid://cmydy5fbx3efb" path="res://resources/app_theme.tres" id="10_33n0x"]
+[ext_resource type="PackedScene" uid="uid://dqs30efmgthen" path="res://scenes/ui/ColorButton.tscn" id="10_572tf"]
+[ext_resource type="Script" path="res://scripts/ui/color_picker_popup.gd" id="10_qsgdp"]
 
 [sub_resource type="Environment" id="Environment_x2nqc"]
 background_mode = 1
@@ -51,6 +53,12 @@ font = ExtResource("9_g152l")
 font_size = 32
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_nasnq"]
+
+[sub_resource type="ButtonGroup" id="ButtonGroup_ws6qe"]
+resource_name = "ColorToolButtons"
+
+[sub_resource type="ButtonGroup" id="ButtonGroup_y0ft3"]
+resource_name = "ColorToolButtons"
 
 [node name="editor_scene" type="Node3D"]
 
@@ -101,8 +109,10 @@ visible = false
 mesh = SubResource("BoxMesh_s4cgk")
 surface_material_override/0 = SubResource("StandardMaterial3D_ysn5f")
 
-[node name="trixel_painter" type="Node3D" parent="." node_paths=PackedStringArray("trile_editor", "debug_label", "primary_action_button", "secondary_action_button")]
+[node name="trixel_painter" type="Node3D" parent="." node_paths=PackedStringArray("primary_color_button", "secondary_color_button", "trile_editor", "debug_label", "primary_action_button", "secondary_action_button")]
 script = ExtResource("5_0ug6d")
+primary_color_button = NodePath("../interface/tools_buttons/primary_color_button")
+secondary_color_button = NodePath("../interface/tools_buttons/secondary_color_button")
 trile_editor = NodePath("../trile_editor")
 debug_label = NodePath("../interface/hover_pos_label")
 primary_action_button = NodePath("../interface/tools_buttons/color_paint_button")
@@ -137,6 +147,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+focus_mode = 1
 script = ExtResource("9_ohhbn")
 
 [node name="vignette_overlay" type="ColorRect" parent="interface"]
@@ -226,45 +237,91 @@ toggle_mode = true
 button_group = SubResource("ButtonGroup_nasnq")
 text = ""
 
-[node name="color_primary_button" type="Button" parent="interface/tools_buttons"]
+[node name="primary_color_button" parent="interface/tools_buttons" instance=ExtResource("10_572tf")]
 custom_minimum_size = Vector2(64, 48)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_type_variation = &"ToolButton"
+toggle_mode = true
+button_group = SubResource("ButtonGroup_ws6qe")
 
-[node name="color" type="ColorRect" parent="interface/tools_buttons/color_primary_button"]
+[node name="secondary_color_button" parent="interface/tools_buttons" instance=ExtResource("10_572tf")]
+custom_minimum_size = Vector2(64, 48)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_type_variation = &"ToolButton"
+toggle_mode = true
+button_group = SubResource("ButtonGroup_y0ft3")
+
+[node name="color_picker_container" type="Panel" parent="interface" node_paths=PackedStringArray("primary_color_button", "secondary_color_button")]
+visible = false
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 80.0
+offset_top = -400.0
+offset_right = 380.0
+offset_bottom = 19.9999
+grow_vertical = 2
+script = ExtResource("10_qsgdp")
+primary_color_button = NodePath("../tools_buttons/primary_color_button")
+secondary_color_button = NodePath("../tools_buttons/secondary_color_button")
+
+[node name="arrangement" type="VBoxContainer" parent="interface/color_picker_container"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -20.0
-offset_top = -15.0
-offset_right = 20.0
-offset_bottom = 15.0
+offset_left = -132.0
+offset_top = -190.0
+offset_right = 132.0
+offset_bottom = 190.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
-color = Color(1, 0, 0, 1)
+theme_override_constants/separation = 10
 
-[node name="color_secondary_button" type="Button" parent="interface/tools_buttons"]
-custom_minimum_size = Vector2(64, 48)
+[node name="color_picker" type="ColorPicker" parent="interface/color_picker_container/arrangement"]
 layout_mode = 2
-size_flags_horizontal = 4
-theme_type_variation = &"ToolButton"
+picker_shape = 1
+sampler_visible = false
+color_modes_visible = false
+sliders_visible = false
+presets_visible = false
 
-[node name="color" type="ColorRect" parent="interface/tools_buttons/color_secondary_button"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -20.0
-offset_top = -15.0
-offset_right = 20.0
-offset_bottom = 15.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
+[node name="emission_controls" type="HBoxContainer" parent="interface/color_picker_container/arrangement"]
+layout_mode = 2
+
+[node name="label" type="Label" parent="interface/color_picker_container/arrangement/emission_controls"]
+layout_mode = 2
+text = "Emission"
+
+[node name="slider" type="HSlider" parent="interface/color_picker_container/arrangement/emission_controls"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+max_value = 255.0
+
+[node name="value" type="SpinBox" parent="interface/color_picker_container/arrangement/emission_controls"]
+layout_mode = 2
+max_value = 255.0
+
+[node name="color_buttons" type="HBoxContainer" parent="interface/color_picker_container/arrangement"]
+layout_mode = 2
+
+[node name="color_button1" parent="interface/color_picker_container/arrangement/color_buttons" instance=ExtResource("10_572tf")]
+layout_mode = 2
+
+[node name="color_button2" parent="interface/color_picker_container/arrangement/color_buttons" instance=ExtResource("10_572tf")]
+layout_mode = 2
+
+[node name="color_button3" parent="interface/color_picker_container/arrangement/color_buttons" instance=ExtResource("10_572tf")]
+layout_mode = 2
+
+[node name="color_button4" parent="interface/color_picker_container/arrangement/color_buttons" instance=ExtResource("10_572tf")]
+layout_mode = 2
+
+[node name="color_button5" parent="interface/color_picker_container/arrangement/color_buttons" instance=ExtResource("10_572tf")]
+layout_mode = 2

@@ -81,6 +81,9 @@ func fill(corner1 : Vector3i, corner2 : Vector3i, state: bool):
 func paint(pos : Vector3i, face : Trile.Face, color : Color):
 	trile.cubemap.paint(pos, face, color)
 
+func pick_color(pos : Vector3i, face : Trile.Face) -> Color:
+	return trile.cubemap.pick_color(pos, face)
+
 func get_global_to_trixel(global_pos : Vector3) -> Vector3:
 	return trile.local_to_trixel(self.to_local(global_pos))
 
