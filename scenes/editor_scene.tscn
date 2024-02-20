@@ -54,10 +54,10 @@ font_size = 32
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_nasnq"]
 
-[sub_resource type="ButtonGroup" id="ButtonGroup_j64w2"]
+[sub_resource type="ButtonGroup" id="ButtonGroup_rtseo"]
 resource_name = "ColorToolButtons"
 
-[sub_resource type="ButtonGroup" id="ButtonGroup_lr34j"]
+[sub_resource type="ButtonGroup" id="ButtonGroup_hppsb"]
 resource_name = "ColorToolButtons"
 
 [node name="editor_scene" type="Node3D"]
@@ -243,7 +243,7 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme_type_variation = &"ToolButton"
 toggle_mode = true
-button_group = SubResource("ButtonGroup_j64w2")
+button_group = SubResource("ButtonGroup_rtseo")
 
 [node name="secondary_color_button" parent="interface/tools_buttons" instance=ExtResource("10_572tf")]
 custom_minimum_size = Vector2(64, 48)
@@ -251,7 +251,7 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme_type_variation = &"ToolButton"
 toggle_mode = true
-button_group = SubResource("ButtonGroup_lr34j")
+button_group = SubResource("ButtonGroup_hppsb")
 
 [node name="color_picker_container" type="Panel" parent="interface" node_paths=PackedStringArray("primary_color_button", "secondary_color_button")]
 visible = false
