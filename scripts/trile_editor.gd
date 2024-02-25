@@ -22,6 +22,8 @@ func _trile_materialized(_trile : Trile, _mesh_data : Array, interrupted : bool)
 func _create_csg_filler(mins : Vector3, maxs : Vector3, state : bool):
 	var box := CSGBox3D.new()
 	
+	var resolution := trile.resolution
+	
 	var region_size := (maxs - mins + Vector3.ONE)
 	var region_midpoint := (mins + maxs + Vector3.ONE) * 0.5
 	
@@ -36,8 +38,9 @@ func _create_csg_filler(mins : Vector3, maxs : Vector3, state : bool):
 
 func _create_material_for_csg_filler(box : CSGBox3D) -> ShaderMaterial:
 	var inner_faces := box.operation == CSGShape3D.OPERATION_SUBTRACTION
-	var size := box.scale / trile.size
-	var offset := (box.position / trile.size) + Vector3.ONE * 0.5
+	var trile_size := (trile.size as Vector3)
+	var size := box.scale / trile_size
+	var offset := (box.position / trile_size) + Vector3.ONE * 0.5
 	
 	var material := ShaderMaterial.new()
 	material.shader = trile.material.shader
@@ -54,14 +57,14 @@ func _clear_csg_fillers():
 	temporary_csg_fillers.clear()
 
 func initialize_new_trile():
-	initialize_trile(Trile.new())
-	fill(Vector3i.ZERO, Vector3i.ONE * (trile.size_in_trixels - 1), true)
+	initialize_trile(Trile.new(Vector3(1.0,0.5,0.25)))
+	fill(Vector3i.ZERO, trile.trixel_bounds - Vector3i.ONE, true)
 
 func initialize_trile(new_trile : Trile):
 	self.trile = new_trile
 	mesh_node.mesh = new_trile
 	new_trile.materializer.materialized.connect(_trile_materialized)
-	visual_boundaries.scale = Vector3.ONE * (trile.size + 0.01)
+	visual_boundaries.scale = (trile.size as Vector3) + Vector3.ONE * 0.01
 
 func fill(corner1 : Vector3i, corner2 : Vector3i, state: bool):
 	var smallest := Vector3i(

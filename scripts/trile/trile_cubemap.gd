@@ -1,6 +1,7 @@
 class_name TrileCubemap extends ImageTexture
 
 var _trile : Trile
+var _texture_resulution: int
 
 var buffer_image : Image
 
@@ -9,19 +10,35 @@ func _init(trile : Trile):
 	_generate_image()
 
 func _generate_image():
-	var width := _trile.size_in_trixels * 6
-	var height := _trile.size_in_trixels
+	var max_dimension := _trile.size[_trile.size.max_axis_index()]
+	_texture_resulution = (max_dimension * _trile.resolution) as int
+	var width := _texture_resulution * 6
+	var height := _texture_resulution
 	buffer_image = Image.create(width, height, false, Image.FORMAT_RGBA8)
 	buffer_image.fill(Color(1.0, 1.0, 1.0, 0.0))
 	set_image(buffer_image)
 
-func paint(position : Vector3i, face : Trile.Face, color : Color):
+func _fill_trixel_face(position : Vector3i, face : Trile.Face, color : Color):
 	var pixel_pos := trixel_coords_to_texture_coords(position, face)
+	if buffer_image.get_pixelv(pixel_pos) == color: return
 	
-	var existing_color = buffer_image.get_pixelv(pixel_pos)
-	if color == existing_color: return
+	var texture_tangent = Trile.get_face_tangent(face) as Vector3i
+	var texture_cotangent = Trile.get_face_cotangent(face) as Vector3i
+	var endpos = position + texture_tangent + texture_cotangent
 	
-	buffer_image.set_pixelv(pixel_pos, color)
+	
+	var pixel_endpos := trixel_coords_to_texture_coords(endpos, face)
+	
+	var pixel_dir = (pixel_endpos - pixel_pos).sign()
+	
+	for x in range(pixel_pos.x, pixel_endpos.x, pixel_dir.x):
+		for y in range(pixel_pos.y, pixel_endpos.y, pixel_dir.y):
+			buffer_image.set_pixel(x, y, color)
+	
+	
+
+func paint(position : Vector3i, face : Trile.Face, color : Color):
+	_fill_trixel_face(position, face, color)
 	set_image(buffer_image)
 
 func fill(position : Vector3i, face : Trile.Face, color : Color):
@@ -61,8 +78,7 @@ func fill(position : Vector3i, face : Trile.Face, color : Color):
 		propagation_triles = new_propagation_triles
 	
 	for pos in triles_to_fill.keys():
-		var pixel_pos := trixel_coords_to_texture_coords(pos, face)
-		buffer_image.set_pixelv(pixel_pos, color)
+		_fill_trixel_face(pos, face, color)
 		
 	set_image(buffer_image)
 
@@ -71,7 +87,9 @@ func pick_color(position : Vector3i, face : Trile.Face) -> Color:
 	return buffer_image.get_pixelv(pixel_pos)
 
 func trixel_coords_to_texture_coords(coords : Vector3i, face : Trile.Face) -> Vector2i:
-	var trixel_local_mid_pos = _trile.trixel_to_local(coords) + Vector3.ONE * (0.5 / _trile.resolution)
+	var texture_based_offset = Vector3.ONE * (0.5 / _trile.resolution)
+	texture_based_offset *= _trile.size * (_trile.resolution / (_texture_resulution as float))
+	var trixel_local_mid_pos = _trile.trixel_to_local(coords) + texture_based_offset
 	var uv_coords := trile_coords_to_uv(trixel_local_mid_pos, face)
 	var texture_pos := uv_coords * (buffer_image.get_size() as Vector2)
 	var pixel_pos := texture_pos.floor() as Vector2i
@@ -82,7 +100,7 @@ func trile_coords_to_uv(coords : Vector3, face : Trile.Face) -> Vector2:
 	
 	var face_normal := Trile.get_face_normal(face) as Vector3
 	
-	var trixel_scaled_position := (coords as Vector3) / (Vector3.ONE * _trile.size)
+	var trixel_scaled_position := (coords as Vector3) / (_trile.size as Vector3)
 	var texture_plane_pos := (Vector3.ONE - face_normal.abs()) * trixel_scaled_position + (face_normal + Vector3.ONE) * 0.5
 	var tangent: = TrileCubemap.get_face_texture_tangent(face)
 	var cotangent := TrileCubemap.get_face_texture_cotangent(face)
