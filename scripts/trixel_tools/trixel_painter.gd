@@ -22,7 +22,10 @@ func _process(delta: float):
 	_update_painter_cursor()
 
 func _update_cursors():
-	_painter_cursor_mesh.visible = (mode == TrixelTool.Mode.PRIMARY)
+	_painter_cursor_mesh.visible = (
+		mode == TrixelTool.Mode.PRIMARY or
+		mode == TrixelTool.Mode.ALT_PRIMARY
+	)
 	_picker_cursor_mesh.visible = (mode == TrixelTool.Mode.SECONDARY)
 
 func _update_painter_cursor():
@@ -41,17 +44,20 @@ func get_painting_color() -> Color:
 
 func _perform_action():
 	if mode == TrixelTool.Mode.PRIMARY:
-		_paint()
+		_paint(false)
+	if mode == TrixelTool.Mode.ALT_PRIMARY:
+		_paint(true)
 	if mode == TrixelTool.Mode.SECONDARY:
 		_pick_color()
 
-func _paint():
+func _paint(fill : bool):
 	# raycaster can occasionally "leak" between trixels
 	# prevent painting when that happens
 	var facepos = _last_trixel_position + Trile.get_face_normal(_last_trixel_face)
 	if trile_editor.trile.get_trixel(facepos): return
 	
-	trile_editor.paint(_last_trixel_position, _last_trixel_face, get_painting_color())
+	trile_editor.paint(_last_trixel_position, _last_trixel_face, get_painting_color(), fill)
+	
 
 func _pick_color():
 	var button_to_change = _get_active_color_button()

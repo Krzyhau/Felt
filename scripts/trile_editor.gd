@@ -78,8 +78,9 @@ func fill(corner1 : Vector3i, corner2 : Vector3i, state: bool):
 	trile.fill_trixels(smallest, largest, state)
 	_create_csg_filler(smallest, largest, state)
 
-func paint(pos : Vector3i, face : Trile.Face, color : Color):
-	trile.cubemap.paint(pos, face, color)
+func paint(pos : Vector3i, face : Trile.Face, color : Color, fill_mode : bool):
+	if fill_mode: trile.cubemap.fill(pos, face, color)
+	else: trile.cubemap.paint(pos, face, color)
 
 func pick_color(pos : Vector3i, face : Trile.Face) -> Color:
 	return trile.cubemap.pick_color(pos, face)

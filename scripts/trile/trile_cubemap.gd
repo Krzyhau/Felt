@@ -23,7 +23,49 @@ func paint(position : Vector3i, face : Trile.Face, color : Color):
 	
 	buffer_image.set_pixelv(pixel_pos, color)
 	set_image(buffer_image)
+
+func fill(position : Vector3i, face : Trile.Face, color : Color):
+	var existing_color = pick_color(position, face)
+	if color == existing_color: return
 	
+	var triles_to_fill := Dictionary()
+	var propagation_triles := Dictionary()
+	
+	var tangent_vector := Trile.get_face_tangent(face)
+	var cotangent_vector := Trile.get_face_cotangent(face)
+	
+	propagation_triles[position] = true
+	
+	while propagation_triles.keys().size() > 0:
+		for pos in propagation_triles.keys():
+			triles_to_fill[pos] = true
+		
+		var new_propagation_triles := Dictionary()
+		
+		for pos in propagation_triles.keys():
+			for newpos in [
+				pos - tangent_vector,
+				pos + tangent_vector,
+				pos - cotangent_vector,
+				pos + cotangent_vector
+			]:
+				if (
+					triles_to_fill.has(newpos) or 
+					new_propagation_triles.has(newpos) or
+					not _trile.is_trixel_face_solid(newpos, face) or
+					pick_color(newpos, face) != existing_color
+				): continue
+				
+				new_propagation_triles[newpos] = true
+		
+		propagation_triles = new_propagation_triles
+	
+	for pos in triles_to_fill.keys():
+		var pixel_pos := trixel_coords_to_texture_coords(pos, face)
+		buffer_image.set_pixelv(pixel_pos, color)
+		
+	set_image(buffer_image)
+
 func pick_color(position : Vector3i, face : Trile.Face) -> Color:
 	var pixel_pos := trixel_coords_to_texture_coords(position, face)
 	return buffer_image.get_pixelv(pixel_pos)

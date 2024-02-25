@@ -1,10 +1,11 @@
 class_name TrixelTool extends Node
 
-enum Mode {NONE, PRIMARY, SECONDARY}
+enum Mode {NONE, PRIMARY, ALT_PRIMARY, SECONDARY}
 
 @export var trile_editor : TrileEditor
 @export var debug_label : Label
 @export var primary_action_button : Button
+@export var alt_primary_action_button : Button
 @export var secondary_action_button : Button
 @export var cursor_oversize : float
 
@@ -20,18 +21,28 @@ var _last_trixel_position : Vector3i
 var _last_trixel_face : Trile.Face
 var _selection_start_trixel_pos : Vector3i
 var _aiming_at_trile : bool
+var _use_alt_tool : bool
 
 func _ready():
-	primary_action_button.toggled.connect(_on_buttons_toggled)
-	secondary_action_button.toggled.connect(_on_buttons_toggled)
+	_register_button(primary_action_button, Mode.PRIMARY)
+	_register_button(alt_primary_action_button, Mode.ALT_PRIMARY)
+	_register_button(secondary_action_button, Mode.SECONDARY)
 	
 	debug_label.text = ""
 	_use_selection_resizing = true
 
-func _on_buttons_toggled(_b):
-	if primary_action_button.button_pressed: mode = Mode.PRIMARY
-	elif secondary_action_button.button_pressed: mode = Mode.SECONDARY
-	else: mode = Mode.NONE
+func _register_button(button : Button, assigned_mode : Mode):
+	if button == null: return
+	button.toggled.connect(func(toggled_on):
+		_on_button_toggled(assigned_mode, toggled_on)
+	)
+
+func _on_button_toggled(assigned_mode : Mode, toggled_on : bool):
+	if toggled_on:
+		mode = assigned_mode
+		_use_alt_tool = true if assigned_mode == Mode.ALT_PRIMARY else false
+	elif mode == assigned_mode:
+		mode = Mode.NONE
 
 func _input(event):
 	if mode == Mode.NONE: return
@@ -47,21 +58,27 @@ func _input_mouse_actions(event):
 		else: _execute_selection()
 
 func _input_handle_mode_switching():
-	var switch := false
-	if Input.is_action_just_pressed("tool_alt"):
-		switch = true
-	if Input.is_action_just_released("tool_alt"):
-		switch = true
+	if secondary_action_button == null: return
 	
-	if switch:
-		if mode == Mode.PRIMARY: 
+	var switch_on := false
+	var switch_off := false
+	if Input.is_action_just_pressed("tool_alt"):
+		switch_on = true
+	if Input.is_action_just_released("tool_alt"):
+		switch_off = true
+	
+	if switch_on or switch_off:
+		if mode == Mode.PRIMARY || mode == Mode.ALT_PRIMARY:
 			secondary_action_button.button_pressed = true
 		elif mode == Mode.SECONDARY: 
-			primary_action_button.button_pressed = true
+			if _use_alt_tool: alt_primary_action_button.button_pressed = true
+			else: primary_action_button.button_pressed = true
 	
 
 func _process(_delta):
-	if mode == Mode.NONE: return
+	if mode == Mode.NONE: 
+		cursor.visible = false
+		return
 	
 	_reload_aimed_trile_pos()
 	_update_cursor()

@@ -54,10 +54,10 @@ font_size = 32
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_nasnq"]
 
-[sub_resource type="ButtonGroup" id="ButtonGroup_rtseo"]
+[sub_resource type="ButtonGroup" id="ButtonGroup_ci2tj"]
 resource_name = "ColorToolButtons"
 
-[sub_resource type="ButtonGroup" id="ButtonGroup_hppsb"]
+[sub_resource type="ButtonGroup" id="ButtonGroup_2kadb"]
 resource_name = "ColorToolButtons"
 
 [node name="editor_scene" type="Node3D"]
@@ -109,13 +109,14 @@ visible = false
 mesh = SubResource("BoxMesh_s4cgk")
 surface_material_override/0 = SubResource("StandardMaterial3D_ysn5f")
 
-[node name="trixel_painter" type="Node3D" parent="." node_paths=PackedStringArray("primary_color_button", "secondary_color_button", "trile_editor", "debug_label", "primary_action_button", "secondary_action_button")]
+[node name="trixel_painter" type="Node3D" parent="." node_paths=PackedStringArray("primary_color_button", "secondary_color_button", "trile_editor", "debug_label", "primary_action_button", "alt_primary_action_button", "secondary_action_button")]
 script = ExtResource("5_0ug6d")
 primary_color_button = NodePath("../interface/tools_buttons/primary_color_button")
 secondary_color_button = NodePath("../interface/tools_buttons/secondary_color_button")
 trile_editor = NodePath("../trile_editor")
 debug_label = NodePath("../interface/hover_pos_label")
 primary_action_button = NodePath("../interface/tools_buttons/color_paint_button")
+alt_primary_action_button = NodePath("../interface/tools_buttons/color_bucket_button")
 secondary_action_button = NodePath("../interface/tools_buttons/color_picker_button")
 cursor_oversize = 0.001
 
@@ -228,6 +229,15 @@ toggle_mode = true
 button_group = SubResource("ButtonGroup_nasnq")
 text = ""
 
+[node name="color_bucket_button" type="Button" parent="interface/tools_buttons"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_type_variation = &"ToolButton"
+toggle_mode = true
+button_group = SubResource("ButtonGroup_nasnq")
+text = ""
+
 [node name="color_picker_button" type="Button" parent="interface/tools_buttons"]
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
@@ -243,7 +253,7 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme_type_variation = &"ToolButton"
 toggle_mode = true
-button_group = SubResource("ButtonGroup_rtseo")
+button_group = SubResource("ButtonGroup_ci2tj")
 
 [node name="secondary_color_button" parent="interface/tools_buttons" instance=ExtResource("10_572tf")]
 custom_minimum_size = Vector2(64, 48)
@@ -251,7 +261,7 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme_type_variation = &"ToolButton"
 toggle_mode = true
-button_group = SubResource("ButtonGroup_hppsb")
+button_group = SubResource("ButtonGroup_2kadb")
 
 [node name="color_picker_container" type="Panel" parent="interface" node_paths=PackedStringArray("primary_color_button", "secondary_color_button")]
 visible = false
