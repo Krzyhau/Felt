@@ -57,7 +57,7 @@ func _clear_csg_fillers():
 	temporary_csg_fillers.clear()
 
 func initialize_new_trile():
-	initialize_trile(Trile.new(Vector3(1.0,0.5,0.25)))
+	initialize_trile(Trile.new())
 	fill(Vector3i.ZERO, trile.trixel_bounds - Vector3i.ONE, true)
 
 func initialize_trile(new_trile : Trile):
