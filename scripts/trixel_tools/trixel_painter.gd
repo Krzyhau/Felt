@@ -45,10 +45,12 @@ func get_painting_color() -> Color:
 func _perform_action():
 	if mode == TrixelTool.Mode.PRIMARY:
 		_paint(false)
-	if mode == TrixelTool.Mode.ALT_PRIMARY:
-		_paint(true)
 	if mode == TrixelTool.Mode.SECONDARY:
 		_pick_color()
+
+func on_selection_started():
+	if mode == TrixelTool.Mode.ALT_PRIMARY:
+		_paint(true)
 
 func _paint(fill : bool):
 	# raycaster can occasionally "leak" between trixels

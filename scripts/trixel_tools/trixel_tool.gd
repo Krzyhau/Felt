@@ -148,8 +148,6 @@ func _execute_selection():
 
 # functions to overload
 func get_debug_text() -> String: return ""
-func on_start_selection(): pass
-func on_end_selection(): pass
 func is_raycast_hit_valid(_hit : TrixelRaycaster.Result) -> bool: return false
 func should_offset_raycast_hit(_hit : TrixelRaycaster.Result) -> bool: return false
 func on_selection_started(): pass
