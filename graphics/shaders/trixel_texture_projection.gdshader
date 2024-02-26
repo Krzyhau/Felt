@@ -1,5 +1,7 @@
 shader_type spatial;
 
+global uniform bool trixel_draw_emission_mask;
+
 uniform sampler2D TEXTURE : filter_nearest;
 
 uniform bool calculate_projection;
@@ -48,6 +50,7 @@ void fragment() {
 		uv = (uv + vec2(float(face_index), 0.0)) / vec2(6.0, 1.0);
 	}
 	
-	ALBEDO = vec3(texture(TEXTURE, uv).xyz);
+	vec4 color = texture(TEXTURE, uv);
+	ALBEDO = (trixel_draw_emission_mask) ? vec3(color.a) : vec3(color.xyz);
 }
 

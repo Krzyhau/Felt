@@ -1,7 +1,8 @@
-[gd_scene load_steps=28 format=3 uid="uid://bu7kws1bt3n66"]
+[gd_scene load_steps=30 format=3 uid="uid://bu7kws1bt3n66"]
 
 [ext_resource type="Shader" path="res://graphics/shaders/boundaries.gdshader" id="1_fbdyu"]
 [ext_resource type="Script" path="res://scripts/orbiting_camera.gd" id="1_h65aw"]
+[ext_resource type="Script" path="res://scripts/shading_control.gd" id="1_sjdmy"]
 [ext_resource type="Script" path="res://scripts/trile_editor.gd" id="2_lpmdn"]
 [ext_resource type="Script" path="res://scripts/trixel_tools/trixel_painter.gd" id="5_0ug6d"]
 [ext_resource type="Shader" path="res://graphics/shaders/vignette.gdshader" id="5_847bu"]
@@ -14,6 +15,7 @@
 [ext_resource type="Texture2D" uid="uid://kbhtccyh7vg4" path="res://logo.png" id="12_8ttqg"]
 [ext_resource type="Script" path="res://scripts/ui/help_menu.gd" id="12_lnyyx"]
 [ext_resource type="Script" path="res://scripts/ui/about_window.gd" id="12_n2yrp"]
+[ext_resource type="Script" path="res://scripts/ui/view_menu.gd" id="13_6ckrc"]
 
 [sub_resource type="Environment" id="Environment_x2nqc"]
 background_mode = 1
@@ -57,23 +59,26 @@ font_size = 32
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_nasnq"]
 
-[sub_resource type="ButtonGroup" id="ButtonGroup_odusf"]
+[sub_resource type="ButtonGroup" id="ButtonGroup_v2h1m"]
 resource_name = "ColorToolButtons"
 
-[sub_resource type="ButtonGroup" id="ButtonGroup_86hf4"]
+[sub_resource type="ButtonGroup" id="ButtonGroup_atw4a"]
 resource_name = "ColorToolButtons"
 
 [node name="editor_scene" type="Node3D"]
 
-[node name="light" type="DirectionalLight3D" parent="."]
-transform = Transform3D(0.866025, 0.383022, -0.321394, 0, 0.642788, 0.766044, 0.5, -0.663414, 0.55667, 0, 0, 0)
-
-[node name="light2" type="DirectionalLight3D" parent="."]
-transform = Transform3D(-0.866025, 0.25, 0.433013, 0, 0.866026, -0.5, -0.5, -0.433013, -0.75, 0, 0, 0)
-light_energy = 0.3
+[node name="shading_control" type="Node" parent="."]
+script = ExtResource("1_sjdmy")
 
 [node name="environment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_x2nqc")
+
+[node name="light2" type="DirectionalLight3D" parent="environment"]
+transform = Transform3D(-0.866025, 0.25, 0.433013, 0, 0.866025, -0.5, -0.5, -0.433013, -0.75, 0, 0, 0)
+light_energy = 0.3
+
+[node name="light" type="DirectionalLight3D" parent="environment"]
+transform = Transform3D(0.866025, 0.383022, -0.321394, 0, 0.642788, 0.766044, 0.5, -0.663414, 0.556671, 0, 0, 0)
 
 [node name="orbiting_camera" type="Node3D" parent="."]
 transform = Transform3D(0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, -0.5, 0.5, -6.38962e-05, 0, -0.00619364)
@@ -256,7 +261,7 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme_type_variation = &"ToolButton"
 toggle_mode = true
-button_group = SubResource("ButtonGroup_odusf")
+button_group = SubResource("ButtonGroup_v2h1m")
 
 [node name="secondary_color_button" parent="interface/tools_buttons" instance=ExtResource("10_572tf")]
 custom_minimum_size = Vector2(64, 48)
@@ -264,7 +269,7 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme_type_variation = &"ToolButton"
 toggle_mode = true
-button_group = SubResource("ButtonGroup_86hf4")
+button_group = SubResource("ButtonGroup_atw4a")
 
 [node name="color_picker_container" type="Panel" parent="interface" node_paths=PackedStringArray("primary_color_button", "secondary_color_button")]
 visible = false
@@ -406,32 +411,13 @@ popup/item_2/separator = true
 popup/item_3/text = "Resize"
 popup/item_3/id = 3
 
-[node name="view_button" type="MenuButton" parent="interface/menu_panel/menu_bar/HBoxContainer"]
+[node name="view_button" type="MenuButton" parent="interface/menu_panel/menu_bar/HBoxContainer" node_paths=PackedStringArray("shading_control", "camera")]
 layout_mode = 2
 text = "View"
 switch_on_hover = true
-item_count = 7
-popup/item_0/text = "Othographic mode"
-popup/item_0/checkable = 1
-popup/item_0/id = 6
-popup/item_1/text = "Recenter camera"
-popup/item_1/id = 7
-popup/item_2/text = "Rendering mode"
-popup/item_2/id = 4
-popup/item_2/separator = true
-popup/item_3/text = "Shaded"
-popup/item_3/checkable = 2
-popup/item_3/checked = true
-popup/item_3/id = 0
-popup/item_4/text = "Flat"
-popup/item_4/checkable = 2
-popup/item_4/id = 1
-popup/item_5/text = "Emission mask"
-popup/item_5/checkable = 2
-popup/item_5/id = 2
-popup/item_6/text = "Wireframe"
-popup/item_6/checkable = 2
-popup/item_6/id = 3
+script = ExtResource("13_6ckrc")
+shading_control = NodePath("../../../../../shading_control")
+camera = NodePath("../../../../../orbiting_camera")
 
 [node name="help_button" type="MenuButton" parent="interface/menu_panel/menu_bar/HBoxContainer" node_paths=PackedStringArray("about_window")]
 layout_mode = 2

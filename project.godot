@@ -85,3 +85,10 @@ tool_alt_action={
 
 textures/canvas_textures/default_texture_filter=0
 renderer/rendering_method.mobile="gl_compatibility"
+
+[shader_globals]
+
+trixel_draw_emission_mask={
+"type": "bool",
+"value": false
+}

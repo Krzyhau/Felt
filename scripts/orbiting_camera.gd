@@ -168,6 +168,8 @@ func switch_ortho():
 		
 	transition(position, quaternion, projection)
 
+func is_ortho():
+	return camera.projection == camera.PROJECTION_ORTHOGONAL
 
 func snap(pitch_dir:int, yaw_dir:int):
 	var angle_delta = Vector3(pitch_dir, yaw_dir, 0.0) * 45.0
