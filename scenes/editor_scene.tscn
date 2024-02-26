@@ -175,7 +175,7 @@ anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
 offset_left = 33.0
-offset_top = -60.0
+offset_top = -61.0
 offset_right = 277.0
 offset_bottom = -20.0
 grow_vertical = 0
@@ -363,11 +363,15 @@ flat = true
 
 [node name="HBoxContainer" type="HBoxContainer" parent="interface/menu_panel/menu_bar"]
 layout_mode = 1
-anchors_preset = 9
+anchors_preset = 15
+anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 8.0
-offset_right = 134.0
+grow_horizontal = 2
 grow_vertical = 2
+
+[node name="padding" type="Control" parent="interface/menu_panel/menu_bar/HBoxContainer"]
+custom_minimum_size = Vector2(8, 0)
+layout_mode = 2
 
 [node name="file_button" type="MenuButton" parent="interface/menu_panel/menu_bar/HBoxContainer"]
 layout_mode = 2
