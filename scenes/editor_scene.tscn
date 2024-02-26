@@ -13,9 +13,9 @@
 [ext_resource type="PackedScene" uid="uid://dqs30efmgthen" path="res://scenes/ui/ColorButton.tscn" id="10_572tf"]
 [ext_resource type="Script" path="res://scripts/ui/color_picker_popup.gd" id="10_qsgdp"]
 [ext_resource type="Texture2D" uid="uid://kbhtccyh7vg4" path="res://logo.png" id="12_8ttqg"]
-[ext_resource type="Script" path="res://scripts/ui/help_menu.gd" id="12_lnyyx"]
+[ext_resource type="Script" path="res://scripts/ui/menus/help_menu.gd" id="12_lnyyx"]
 [ext_resource type="Script" path="res://scripts/ui/about_window.gd" id="12_n2yrp"]
-[ext_resource type="Script" path="res://scripts/ui/view_menu.gd" id="13_6ckrc"]
+[ext_resource type="Script" path="res://scripts/ui/menus/view_menu.gd" id="13_6ckrc"]
 
 [sub_resource type="Environment" id="Environment_x2nqc"]
 background_mode = 1
@@ -59,10 +59,10 @@ font_size = 32
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_nasnq"]
 
-[sub_resource type="ButtonGroup" id="ButtonGroup_v2h1m"]
+[sub_resource type="ButtonGroup" id="ButtonGroup_bdrl1"]
 resource_name = "ColorToolButtons"
 
-[sub_resource type="ButtonGroup" id="ButtonGroup_atw4a"]
+[sub_resource type="ButtonGroup" id="ButtonGroup_tmv1x"]
 resource_name = "ColorToolButtons"
 
 [node name="editor_scene" type="Node3D"]
@@ -261,7 +261,7 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme_type_variation = &"ToolButton"
 toggle_mode = true
-button_group = SubResource("ButtonGroup_v2h1m")
+button_group = SubResource("ButtonGroup_bdrl1")
 
 [node name="secondary_color_button" parent="interface/tools_buttons" instance=ExtResource("10_572tf")]
 custom_minimum_size = Vector2(64, 48)
@@ -269,7 +269,7 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme_type_variation = &"ToolButton"
 toggle_mode = true
-button_group = SubResource("ButtonGroup_atw4a")
+button_group = SubResource("ButtonGroup_tmv1x")
 
 [node name="color_picker_container" type="Panel" parent="interface" node_paths=PackedStringArray("primary_color_button", "secondary_color_button")]
 visible = false
