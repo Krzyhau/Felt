@@ -1,4 +1,4 @@
-[gd_scene load_steps=30 format=3 uid="uid://bu7kws1bt3n66"]
+[gd_scene load_steps=31 format=3 uid="uid://bu7kws1bt3n66"]
 
 [ext_resource type="Shader" path="res://graphics/shaders/boundaries.gdshader" id="1_fbdyu"]
 [ext_resource type="Script" path="res://scripts/orbiting_camera.gd" id="1_h65aw"]
@@ -15,6 +15,7 @@
 [ext_resource type="Texture2D" uid="uid://kbhtccyh7vg4" path="res://logo.png" id="12_8ttqg"]
 [ext_resource type="Script" path="res://scripts/ui/menus/help_menu.gd" id="12_lnyyx"]
 [ext_resource type="Script" path="res://scripts/ui/about_window.gd" id="12_n2yrp"]
+[ext_resource type="Script" path="res://scripts/ui/menus/file_menu.gd" id="13_1ov3j"]
 [ext_resource type="Script" path="res://scripts/ui/menus/view_menu.gd" id="13_6ckrc"]
 
 [sub_resource type="Environment" id="Environment_x2nqc"]
@@ -59,28 +60,32 @@ font_size = 32
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_nasnq"]
 
-[sub_resource type="ButtonGroup" id="ButtonGroup_bdrl1"]
+[sub_resource type="ButtonGroup" id="ButtonGroup_fki23"]
 resource_name = "ColorToolButtons"
 
-[sub_resource type="ButtonGroup" id="ButtonGroup_tmv1x"]
+[sub_resource type="ButtonGroup" id="ButtonGroup_0sauw"]
 resource_name = "ColorToolButtons"
 
 [node name="editor_scene" type="Node3D"]
 
-[node name="shading_control" type="Node" parent="."]
-script = ExtResource("1_sjdmy")
+[node name="scene3d" type="Node3D" parent="."]
 
-[node name="environment" type="WorldEnvironment" parent="."]
+[node name="visuals" type="Node" parent="scene3d"]
+
+[node name="environment" type="WorldEnvironment" parent="scene3d/visuals"]
 environment = SubResource("Environment_x2nqc")
 
-[node name="light2" type="DirectionalLight3D" parent="environment"]
+[node name="light2" type="DirectionalLight3D" parent="scene3d/visuals/environment"]
 transform = Transform3D(-0.866025, 0.25, 0.433013, 0, 0.866025, -0.5, -0.5, -0.433013, -0.75, 0, 0, 0)
 light_energy = 0.3
 
-[node name="light" type="DirectionalLight3D" parent="environment"]
+[node name="light" type="DirectionalLight3D" parent="scene3d/visuals/environment"]
 transform = Transform3D(0.866025, 0.383022, -0.321394, 0, 0.642788, 0.766044, 0.5, -0.663414, 0.556671, 0, 0, 0)
 
-[node name="orbiting_camera" type="Node3D" parent="."]
+[node name="shading_control" type="Node" parent="scene3d/visuals"]
+script = ExtResource("1_sjdmy")
+
+[node name="orbiting_camera" type="Node3D" parent="scene3d"]
 transform = Transform3D(0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, -0.5, 0.5, -6.38962e-05, 0, -0.00619364)
 script = ExtResource("1_h65aw")
 minimum_zoom_distance = 0.1
@@ -90,53 +95,53 @@ zoom_distance_interpolation = 20.0
 orbiting_scale = 0.25
 transition_time = 0.2
 
-[node name="camera3d" type="Camera3D" parent="orbiting_camera"]
+[node name="camera3d" type="Camera3D" parent="scene3d/orbiting_camera"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2)
 
-[node name="trile_editor" type="Node3D" parent="."]
+[node name="trile_editor" type="Node3D" parent="scene3d"]
 script = ExtResource("2_lpmdn")
 
-[node name="boundaries" type="MeshInstance3D" parent="trile_editor"]
+[node name="boundaries" type="MeshInstance3D" parent="scene3d/trile_editor"]
 mesh = SubResource("BoxMesh_3cab4")
-skeleton = NodePath("../..")
+skeleton = NodePath("../../..")
 surface_material_override/0 = SubResource("ShaderMaterial_5bqro")
 
-[node name="mesh" type="CSGMesh3D" parent="trile_editor"]
+[node name="mesh" type="CSGMesh3D" parent="scene3d/trile_editor"]
 
-[node name="trixel_placer" type="Node3D" parent="." node_paths=PackedStringArray("trile_editor", "debug_label", "primary_action_button", "secondary_action_button")]
+[node name="trixel_placer" type="Node3D" parent="scene3d" node_paths=PackedStringArray("trile_editor", "debug_label", "primary_action_button", "secondary_action_button")]
 script = ExtResource("7_nk0l3")
 trile_editor = NodePath("../trile_editor")
-debug_label = NodePath("../interface/hover_pos_label")
-primary_action_button = NodePath("../interface/tools_buttons/trixel_place_button")
-secondary_action_button = NodePath("../interface/tools_buttons/trixel_erase_button")
+debug_label = NodePath("../../interface/hover_pos_label")
+primary_action_button = NodePath("../../interface/tools_buttons/trixel_place_button")
+secondary_action_button = NodePath("../../interface/tools_buttons/trixel_erase_button")
 cursor_oversize = 0.001
 
-[node name="cursor" type="MeshInstance3D" parent="trixel_placer"]
+[node name="cursor" type="MeshInstance3D" parent="scene3d/trixel_placer"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0.5, 0.5)
 visible = false
 mesh = SubResource("BoxMesh_s4cgk")
 surface_material_override/0 = SubResource("StandardMaterial3D_ysn5f")
 
-[node name="trixel_painter" type="Node3D" parent="." node_paths=PackedStringArray("primary_color_button", "secondary_color_button", "trile_editor", "debug_label", "primary_action_button", "alt_primary_action_button", "secondary_action_button")]
+[node name="trixel_painter" type="Node3D" parent="scene3d" node_paths=PackedStringArray("primary_color_button", "secondary_color_button", "trile_editor", "debug_label", "primary_action_button", "alt_primary_action_button", "secondary_action_button")]
 script = ExtResource("5_0ug6d")
-primary_color_button = NodePath("../interface/tools_buttons/primary_color_button")
-secondary_color_button = NodePath("../interface/tools_buttons/secondary_color_button")
+primary_color_button = NodePath("../../interface/tools_buttons/primary_color_button")
+secondary_color_button = NodePath("../../interface/tools_buttons/secondary_color_button")
 trile_editor = NodePath("../trile_editor")
-debug_label = NodePath("../interface/hover_pos_label")
-primary_action_button = NodePath("../interface/tools_buttons/color_paint_button")
-alt_primary_action_button = NodePath("../interface/tools_buttons/color_bucket_button")
-secondary_action_button = NodePath("../interface/tools_buttons/color_picker_button")
+debug_label = NodePath("../../interface/hover_pos_label")
+primary_action_button = NodePath("../../interface/tools_buttons/color_paint_button")
+alt_primary_action_button = NodePath("../../interface/tools_buttons/color_bucket_button")
+secondary_action_button = NodePath("../../interface/tools_buttons/color_picker_button")
 cursor_oversize = 0.001
 
-[node name="cursor" type="Node3D" parent="trixel_painter"]
+[node name="cursor" type="Node3D" parent="scene3d/trixel_painter"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0.5, 0.5)
 visible = false
 
-[node name="picker_cursor_mesh" type="MeshInstance3D" parent="trixel_painter/cursor"]
+[node name="picker_cursor_mesh" type="MeshInstance3D" parent="scene3d/trixel_painter/cursor"]
 mesh = SubResource("QuadMesh_vps5c")
 surface_material_override/0 = SubResource("ShaderMaterial_bp3hr")
 
-[node name="painter_cursor_mesh" type="MeshInstance3D" parent="trixel_painter/cursor"]
+[node name="painter_cursor_mesh" type="MeshInstance3D" parent="scene3d/trixel_painter/cursor"]
 mesh = SubResource("QuadMesh_vps5c")
 surface_material_override/0 = SubResource("StandardMaterial3D_sgkuh")
 
@@ -261,7 +266,7 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme_type_variation = &"ToolButton"
 toggle_mode = true
-button_group = SubResource("ButtonGroup_bdrl1")
+button_group = SubResource("ButtonGroup_fki23")
 
 [node name="secondary_color_button" parent="interface/tools_buttons" instance=ExtResource("10_572tf")]
 custom_minimum_size = Vector2(64, 48)
@@ -269,7 +274,7 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme_type_variation = &"ToolButton"
 toggle_mode = true
-button_group = SubResource("ButtonGroup_tmv1x")
+button_group = SubResource("ButtonGroup_0sauw")
 
 [node name="color_picker_container" type="Panel" parent="interface" node_paths=PackedStringArray("primary_color_button", "secondary_color_button")]
 visible = false
@@ -373,30 +378,12 @@ grow_vertical = 2
 custom_minimum_size = Vector2(8, 0)
 layout_mode = 2
 
-[node name="file_button" type="MenuButton" parent="interface/menu_panel/menu_bar/HBoxContainer"]
+[node name="file_button" type="MenuButton" parent="interface/menu_panel/menu_bar/HBoxContainer" node_paths=PackedStringArray("open_file_dialog")]
 layout_mode = 2
 text = "File"
 switch_on_hover = true
-item_count = 8
-popup/item_0/text = "New Art Object"
-popup/item_0/id = 0
-popup/item_1/text = "New Trile Set"
-popup/item_1/id = 1
-popup/item_2/text = ""
-popup/item_2/id = 6
-popup/item_2/separator = true
-popup/item_3/text = "Open"
-popup/item_3/id = 2
-popup/item_4/text = "Save as..."
-popup/item_4/id = 3
-popup/item_5/text = "Save"
-popup/item_5/id = 4
-popup/item_5/disabled = true
-popup/item_6/text = ""
-popup/item_6/id = 7
-popup/item_6/separator = true
-popup/item_7/text = "Exit"
-popup/item_7/id = 5
+script = ExtResource("13_1ov3j")
+open_file_dialog = NodePath("../../../../../windows/open_file_dialog")
 
 [node name="edit_button" type="MenuButton" parent="interface/menu_panel/menu_bar/HBoxContainer"]
 layout_mode = 2
@@ -420,17 +407,19 @@ layout_mode = 2
 text = "View"
 switch_on_hover = true
 script = ExtResource("13_6ckrc")
-shading_control = NodePath("../../../../../shading_control")
-camera = NodePath("../../../../../orbiting_camera")
+shading_control = NodePath("../../../../../scene3d/visuals/shading_control")
+camera = NodePath("../../../../../scene3d/orbiting_camera")
 
 [node name="help_button" type="MenuButton" parent="interface/menu_panel/menu_bar/HBoxContainer" node_paths=PackedStringArray("about_window")]
 layout_mode = 2
 text = "Help"
 switch_on_hover = true
 script = ExtResource("12_lnyyx")
-about_window = NodePath("../../../../../about_window")
+about_window = NodePath("../../../../../windows/about_window")
 
-[node name="about_window" type="Window" parent="."]
+[node name="windows" type="Node" parent="."]
+
+[node name="about_window" type="Window" parent="windows"]
 title = "About Felt..."
 initial_position = 2
 size = Vector2i(500, 300)
@@ -440,7 +429,7 @@ unresizable = true
 popup_window = true
 script = ExtResource("12_n2yrp")
 
-[node name="ColorRect" type="ColorRect" parent="about_window"]
+[node name="ColorRect" type="ColorRect" parent="windows/about_window"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -448,7 +437,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.0745098, 0.0627451, 0.0980392, 1)
 
-[node name="VBoxContainer" type="VBoxContainer" parent="about_window"]
+[node name="VBoxContainer" type="VBoxContainer" parent="windows/about_window"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -457,23 +446,31 @@ offset_bottom = 86.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="TextureRect" type="TextureRect" parent="about_window/VBoxContainer"]
+[node name="TextureRect" type="TextureRect" parent="windows/about_window/VBoxContainer"]
 custom_minimum_size = Vector2(0, 150)
 layout_mode = 2
 texture = ExtResource("12_8ttqg")
 expand_mode = 2
 stretch_mode = 5
 
-[node name="padding" type="Control" parent="about_window/VBoxContainer"]
+[node name="padding" type="Control" parent="windows/about_window/VBoxContainer"]
 custom_minimum_size = Vector2(0, 16)
 layout_mode = 2
 
-[node name="Label" type="Label" parent="about_window/VBoxContainer"]
+[node name="Label" type="Label" parent="windows/about_window/VBoxContainer"]
 layout_mode = 2
 text = "Created by Krzyhau (https://github.com/Krzyhau)"
 horizontal_alignment = 1
 
-[node name="Label2" type="Label" parent="about_window/VBoxContainer"]
+[node name="Label2" type="Label" parent="windows/about_window/VBoxContainer"]
 layout_mode = 2
 text = "This project is licensed under GPLv3"
 horizontal_alignment = 1
+
+[node name="open_file_dialog" type="FileDialog" parent="windows"]
+title = "Open a File"
+ok_button_text = "Otwórz"
+file_mode = 0
+access = 2
+filters = PackedStringArray("*.fezao.json, *.fezts.json; Converted Trixel Art Formats")
+use_native_dialog = true
