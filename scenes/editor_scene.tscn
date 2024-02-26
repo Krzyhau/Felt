@@ -419,15 +419,15 @@ about_window = NodePath("../../../../../windows/about_window")
 
 [node name="windows" type="Node" parent="."]
 
-[node name="about_window" type="Window" parent="windows"]
+[node name="about_window" type="Window" parent="windows" node_paths=PackedStringArray("version_text")]
 title = "About Felt..."
 initial_position = 2
 size = Vector2i(500, 300)
-visible = false
 exclusive = true
 unresizable = true
 popup_window = true
 script = ExtResource("12_n2yrp")
+version_text = NodePath("VBoxContainer/version_label")
 
 [node name="ColorRect" type="ColorRect" parent="windows/about_window"]
 anchors_preset = 15
@@ -441,13 +441,13 @@ color = Color(0.0745098, 0.0627451, 0.0980392, 1)
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = 32.0
-offset_bottom = 86.0
+offset_top = 24.0
+offset_bottom = 78.0
 grow_horizontal = 2
 grow_vertical = 2
 
 [node name="TextureRect" type="TextureRect" parent="windows/about_window/VBoxContainer"]
-custom_minimum_size = Vector2(0, 150)
+custom_minimum_size = Vector2(0, 140)
 layout_mode = 2
 texture = ExtResource("12_8ttqg")
 expand_mode = 2
@@ -456,6 +456,11 @@ stretch_mode = 5
 [node name="padding" type="Control" parent="windows/about_window/VBoxContainer"]
 custom_minimum_size = Vector2(0, 16)
 layout_mode = 2
+
+[node name="version_label" type="Label" parent="windows/about_window/VBoxContainer"]
+layout_mode = 2
+text = "Version 0.0.0"
+horizontal_alignment = 1
 
 [node name="Label" type="Label" parent="windows/about_window/VBoxContainer"]
 layout_mode = 2
