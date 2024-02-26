@@ -1,4 +1,4 @@
-[gd_scene load_steps=25 format=3 uid="uid://bu7kws1bt3n66"]
+[gd_scene load_steps=28 format=3 uid="uid://bu7kws1bt3n66"]
 
 [ext_resource type="Shader" path="res://graphics/shaders/boundaries.gdshader" id="1_fbdyu"]
 [ext_resource type="Script" path="res://scripts/orbiting_camera.gd" id="1_h65aw"]
@@ -11,6 +11,9 @@
 [ext_resource type="Theme" uid="uid://cmydy5fbx3efb" path="res://resources/app_theme.tres" id="10_33n0x"]
 [ext_resource type="PackedScene" uid="uid://dqs30efmgthen" path="res://scenes/ui/ColorButton.tscn" id="10_572tf"]
 [ext_resource type="Script" path="res://scripts/ui/color_picker_popup.gd" id="10_qsgdp"]
+[ext_resource type="Texture2D" uid="uid://kbhtccyh7vg4" path="res://logo.png" id="12_8ttqg"]
+[ext_resource type="Script" path="res://scripts/ui/help_menu.gd" id="12_lnyyx"]
+[ext_resource type="Script" path="res://scripts/ui/about_window.gd" id="12_n2yrp"]
 
 [sub_resource type="Environment" id="Environment_x2nqc"]
 background_mode = 1
@@ -54,10 +57,10 @@ font_size = 32
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_nasnq"]
 
-[sub_resource type="ButtonGroup" id="ButtonGroup_plai8"]
+[sub_resource type="ButtonGroup" id="ButtonGroup_odusf"]
 resource_name = "ColorToolButtons"
 
-[sub_resource type="ButtonGroup" id="ButtonGroup_ih7lk"]
+[sub_resource type="ButtonGroup" id="ButtonGroup_86hf4"]
 resource_name = "ColorToolButtons"
 
 [node name="editor_scene" type="Node3D"]
@@ -253,7 +256,7 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme_type_variation = &"ToolButton"
 toggle_mode = true
-button_group = SubResource("ButtonGroup_plai8")
+button_group = SubResource("ButtonGroup_odusf")
 
 [node name="secondary_color_button" parent="interface/tools_buttons" instance=ExtResource("10_572tf")]
 custom_minimum_size = Vector2(64, 48)
@@ -261,7 +264,7 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme_type_variation = &"ToolButton"
 toggle_mode = true
-button_group = SubResource("ButtonGroup_ih7lk")
+button_group = SubResource("ButtonGroup_86hf4")
 
 [node name="color_picker_container" type="Panel" parent="interface" node_paths=PackedStringArray("primary_color_button", "secondary_color_button")]
 visible = false
@@ -335,3 +338,152 @@ layout_mode = 2
 
 [node name="color_button5" parent="interface/color_picker_container/arrangement/color_buttons" instance=ExtResource("10_572tf")]
 layout_mode = 2
+
+[node name="menu_panel" type="Panel" parent="interface"]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+grow_horizontal = 2
+
+[node name="menu_bar" type="MenuBar" parent="interface/menu_panel"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+flat = true
+
+[node name="HBoxContainer" type="HBoxContainer" parent="interface/menu_panel/menu_bar"]
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_right = 134.0
+grow_vertical = 2
+
+[node name="file_button" type="MenuButton" parent="interface/menu_panel/menu_bar/HBoxContainer"]
+layout_mode = 2
+text = "File"
+switch_on_hover = true
+item_count = 8
+popup/item_0/text = "New Art Object"
+popup/item_0/id = 0
+popup/item_1/text = "New Trile Set"
+popup/item_1/id = 1
+popup/item_2/text = ""
+popup/item_2/id = 6
+popup/item_2/separator = true
+popup/item_3/text = "Open"
+popup/item_3/id = 2
+popup/item_4/text = "Save as..."
+popup/item_4/id = 3
+popup/item_5/text = "Save"
+popup/item_5/id = 4
+popup/item_5/disabled = true
+popup/item_6/text = ""
+popup/item_6/id = 7
+popup/item_6/separator = true
+popup/item_7/text = "Exit"
+popup/item_7/id = 5
+
+[node name="edit_button" type="MenuButton" parent="interface/menu_panel/menu_bar/HBoxContainer"]
+layout_mode = 2
+text = "Edit"
+switch_on_hover = true
+item_count = 4
+popup/item_0/text = "Undo"
+popup/item_0/id = 0
+popup/item_0/disabled = true
+popup/item_1/text = "Redo"
+popup/item_1/id = 1
+popup/item_1/disabled = true
+popup/item_2/text = ""
+popup/item_2/id = 2
+popup/item_2/separator = true
+popup/item_3/text = "Resize"
+popup/item_3/id = 3
+
+[node name="view_button" type="MenuButton" parent="interface/menu_panel/menu_bar/HBoxContainer"]
+layout_mode = 2
+text = "View"
+switch_on_hover = true
+item_count = 7
+popup/item_0/text = "Othographic mode"
+popup/item_0/checkable = 1
+popup/item_0/id = 6
+popup/item_1/text = "Recenter camera"
+popup/item_1/id = 7
+popup/item_2/text = "Rendering mode"
+popup/item_2/id = 4
+popup/item_2/separator = true
+popup/item_3/text = "Shaded"
+popup/item_3/checkable = 2
+popup/item_3/checked = true
+popup/item_3/id = 0
+popup/item_4/text = "Flat"
+popup/item_4/checkable = 2
+popup/item_4/id = 1
+popup/item_5/text = "Emission mask"
+popup/item_5/checkable = 2
+popup/item_5/id = 2
+popup/item_6/text = "Wireframe"
+popup/item_6/checkable = 2
+popup/item_6/id = 3
+
+[node name="help_button" type="MenuButton" parent="interface/menu_panel/menu_bar/HBoxContainer" node_paths=PackedStringArray("about_window")]
+layout_mode = 2
+text = "Help"
+switch_on_hover = true
+script = ExtResource("12_lnyyx")
+about_window = NodePath("../../../../../about_window")
+
+[node name="about_window" type="Window" parent="."]
+title = "About Felt..."
+initial_position = 2
+size = Vector2i(500, 300)
+visible = false
+exclusive = true
+unresizable = true
+popup_window = true
+script = ExtResource("12_n2yrp")
+
+[node name="ColorRect" type="ColorRect" parent="about_window"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.0745098, 0.0627451, 0.0980392, 1)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="about_window"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 32.0
+offset_bottom = 86.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TextureRect" type="TextureRect" parent="about_window/VBoxContainer"]
+custom_minimum_size = Vector2(0, 150)
+layout_mode = 2
+texture = ExtResource("12_8ttqg")
+expand_mode = 2
+stretch_mode = 5
+
+[node name="padding" type="Control" parent="about_window/VBoxContainer"]
+custom_minimum_size = Vector2(0, 16)
+layout_mode = 2
+
+[node name="Label" type="Label" parent="about_window/VBoxContainer"]
+layout_mode = 2
+text = "Created by Krzyhau (https://github.com/Krzyhau)"
+horizontal_alignment = 1
+
+[node name="Label2" type="Label" parent="about_window/VBoxContainer"]
+layout_mode = 2
+text = "This project is licensed under GPLv3"
+horizontal_alignment = 1

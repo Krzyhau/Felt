@@ -1,6 +1,6 @@
 <div align="center">
 
-![felt logo](logo.png)
+![felt logo](../logo.png)
 
 </div>
 
