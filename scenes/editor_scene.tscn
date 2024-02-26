@@ -423,6 +423,7 @@ about_window = NodePath("../../../../../windows/about_window")
 title = "About Felt..."
 initial_position = 2
 size = Vector2i(500, 300)
+visible = false
 exclusive = true
 unresizable = true
 popup_window = true
