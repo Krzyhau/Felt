@@ -51,6 +51,12 @@ void fragment() {
 	}
 	
 	vec4 color = texture(TEXTURE, uv);
-	ALBEDO = (trixel_draw_emission_mask) ? vec3(color.a) : vec3(color.xyz);
+	if(trixel_draw_emission_mask){
+		ALBEDO = vec3(color.a);
+	}else{
+		ALBEDO = vec3(color.xyz);
+		EMISSION = ALBEDO * color.a;
+	}
+	
 }
 
