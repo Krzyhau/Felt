@@ -1,6 +1,6 @@
 extends MenuButton
 
-@export var open_file_dialog : FileDialog
+@export var session_controller : FeltSession
 
 @warning_ignore("int_as_enum_without_cast")
 @warning_ignore("int_as_enum_without_match")
@@ -33,7 +33,7 @@ func _new_trile_set():
 	pass
 	
 func _open_file():
-	open_file_dialog.visible = true
+	session_controller.try_open_file()
 	
 func _save_current():
 	pass
@@ -42,4 +42,4 @@ func _save_current_as():
 	pass
 	
 func _quit():
-	get_tree().quit()
+	session_controller.try_quit()

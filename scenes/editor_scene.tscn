@@ -1,7 +1,8 @@
-[gd_scene load_steps=31 format=3 uid="uid://bu7kws1bt3n66"]
+[gd_scene load_steps=33 format=3 uid="uid://bu7kws1bt3n66"]
 
 [ext_resource type="Shader" path="res://graphics/shaders/boundaries.gdshader" id="1_fbdyu"]
 [ext_resource type="Script" path="res://scripts/orbiting_camera.gd" id="1_h65aw"]
+[ext_resource type="Script" path="res://scripts/session.gd" id="1_kn7am"]
 [ext_resource type="Script" path="res://scripts/shading_control.gd" id="1_sjdmy"]
 [ext_resource type="Script" path="res://scripts/trile_editor.gd" id="2_lpmdn"]
 [ext_resource type="Script" path="res://scripts/trixel_tools/trixel_painter.gd" id="5_0ug6d"]
@@ -17,6 +18,7 @@
 [ext_resource type="Script" path="res://scripts/ui/about_window.gd" id="12_n2yrp"]
 [ext_resource type="Script" path="res://scripts/ui/menus/file_menu.gd" id="13_1ov3j"]
 [ext_resource type="Script" path="res://scripts/ui/menus/view_menu.gd" id="13_6ckrc"]
+[ext_resource type="Script" path="res://scripts/ui/exit_discard_dialog.gd" id="19_3yoy6"]
 
 [sub_resource type="Environment" id="Environment_x2nqc"]
 background_mode = 1
@@ -60,13 +62,17 @@ font_size = 32
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_nasnq"]
 
-[sub_resource type="ButtonGroup" id="ButtonGroup_fki23"]
+[sub_resource type="ButtonGroup" id="ButtonGroup_sboxj"]
 resource_name = "ColorToolButtons"
 
-[sub_resource type="ButtonGroup" id="ButtonGroup_0sauw"]
+[sub_resource type="ButtonGroup" id="ButtonGroup_prdyd"]
 resource_name = "ColorToolButtons"
 
-[node name="editor_scene" type="Node3D"]
+[node name="editor_scene" type="Node3D" node_paths=PackedStringArray("open_discard_dialog", "exit_discard_dialog", "open_file_dialog")]
+script = ExtResource("1_kn7am")
+open_discard_dialog = NodePath("windows/open_discard_dialog")
+exit_discard_dialog = NodePath("windows/exit_discard_dialog")
+open_file_dialog = NodePath("windows/open_file_dialog")
 
 [node name="scene3d" type="Node3D" parent="."]
 
@@ -266,7 +272,7 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme_type_variation = &"ToolButton"
 toggle_mode = true
-button_group = SubResource("ButtonGroup_fki23")
+button_group = SubResource("ButtonGroup_sboxj")
 
 [node name="secondary_color_button" parent="interface/tools_buttons" instance=ExtResource("10_572tf")]
 custom_minimum_size = Vector2(64, 48)
@@ -274,7 +280,7 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme_type_variation = &"ToolButton"
 toggle_mode = true
-button_group = SubResource("ButtonGroup_0sauw")
+button_group = SubResource("ButtonGroup_prdyd")
 
 [node name="color_picker_container" type="Panel" parent="interface" node_paths=PackedStringArray("primary_color_button", "secondary_color_button")]
 visible = false
@@ -378,12 +384,12 @@ grow_vertical = 2
 custom_minimum_size = Vector2(8, 0)
 layout_mode = 2
 
-[node name="file_button" type="MenuButton" parent="interface/menu_panel/menu_bar/HBoxContainer" node_paths=PackedStringArray("open_file_dialog")]
+[node name="file_button" type="MenuButton" parent="interface/menu_panel/menu_bar/HBoxContainer" node_paths=PackedStringArray("session_controller")]
 layout_mode = 2
 text = "File"
 switch_on_hover = true
 script = ExtResource("13_1ov3j")
-open_file_dialog = NodePath("../../../../../windows/open_file_dialog")
+session_controller = NodePath("../../../../..")
 
 [node name="edit_button" type="MenuButton" parent="interface/menu_panel/menu_bar/HBoxContainer"]
 layout_mode = 2
@@ -480,3 +486,60 @@ file_mode = 0
 access = 2
 filters = PackedStringArray("*.fezao.json, *.fezts.json; Converted Trixel Art Formats")
 use_native_dialog = true
+
+[node name="open_discard_dialog" type="ConfirmationDialog" parent="windows"]
+title = "Unsaved changes"
+initial_position = 2
+size = Vector2i(400, 106)
+popup_window = true
+ok_button_text = "Continue"
+dialog_text = "All unsaved work will be lost. 
+Are you sure you want to continue?"
+dialog_autowrap = true
+
+[node name="exit_discard_dialog" type="Window" parent="windows" node_paths=PackedStringArray("save_button", "dont_save_button", "cancel_button")]
+title = "Unsaved changes"
+initial_position = 2
+size = Vector2i(400, 106)
+visible = false
+transient = true
+exclusive = true
+unresizable = true
+popup_window = true
+script = ExtResource("19_3yoy6")
+save_button = NodePath("VBoxContainer/HBoxContainer/save")
+dont_save_button = NodePath("VBoxContainer/HBoxContainer/dontsave")
+cancel_button = NodePath("VBoxContainer/HBoxContainer/cancel")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="windows/exit_discard_dialog"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = 94.0
+grow_horizontal = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+alignment = 1
+
+[node name="Label" type="Label" parent="windows/exit_discard_dialog/VBoxContainer"]
+layout_mode = 2
+text = "Unsaved changes detected.
+Do you want to save them before leaving?"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="windows/exit_discard_dialog/VBoxContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="save" type="Button" parent="windows/exit_discard_dialog/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Save"
+
+[node name="dontsave" type="Button" parent="windows/exit_discard_dialog/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Don't Save"
+
+[node name="cancel" type="Button" parent="windows/exit_discard_dialog/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Cancel"
