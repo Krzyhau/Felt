@@ -7,71 +7,58 @@ static func deserialize_from(text : String) -> Dictionary:
 	var uvs := PackedVector2Array()
 	var normals := PackedVector3Array()
 	var all_faces := Dictionary()
-	var current_faces := []
+	var current_faces := PackedInt32Array()
 	
 	var current_obj := ""
 	
-	for line in text.split("\n"):
+	for line : String in text.split("\n", false):
 		line = line.strip_edges(true, true)
 		
-		var params := line.split(" ")
-		var paramcount := params.size()
-		
-		match params[0]:
-			"o":
-				if current_faces.size() > 0: all_faces[current_obj] = current_faces
-				current_faces = []
-				if params.size() > 1: current_obj = params[1]
-			"v":
-				vertices.append(Vector3(
-					params[1].to_float() if paramcount > 3 else 0.0,
-					params[2].to_float() if paramcount > 3 else 0.0,
-					params[3].to_float() if paramcount > 3 else 0.0,
-				))
-			"vt": 
-				uvs.append(Vector2(
-					params[1].to_float() if paramcount > 2 else 0.0,
-					params[2].to_float() if paramcount > 2 else 0.0,
-				))
-			"vn": 
-				normals.append(Vector3(
-					params[1].to_float() if paramcount > 3 else 0.0,
-					params[2].to_float() if paramcount > 3 else 0.0,
-					params[3].to_float() if paramcount > 3 else 0.0,
-				))
-			"f":
-				for i in range(3):
-					# Godot uses clockwise vertex ordering, while OBJ uses counter-clockwise
-					var data_string : String = params[3-i] if (3-i) < params.size() else ""
-					var data_params := data_string.split("/")
-					var dataparamcount = data_params.size()
-					current_faces.append(Vector3i(
-						data_params[0].to_int() if dataparamcount > 0 else 0,
-						data_params[1].to_int() if dataparamcount > 1 else 0,
-						data_params[2].to_int() if dataparamcount > 2 else 0,
-					))
+		if line.begins_with("v "):
+			var values := line.substr(2).split_floats(" ", false)
+			values.resize(3)
+			vertices.append(Vector3(values[0], values[1], values[2]))
+		elif line.begins_with("vt "):
+			var values := line.substr(3).split_floats(" ", false)
+			values.resize(2)
+			uvs.append(Vector2(values[0], values[1]))
+		elif line.begins_with("vn "):
+			var values := line.substr(3).split_floats(" ", false)
+			values.resize(3)
+			normals.append(Vector3(values[0], values[1], values[2]))
+		elif line.begins_with("f "):
+			var params := line.split(" ", false)
+			# Godot uses clockwise vertex ordering, while OBJ uses counter-clockwise
+			for i in range(3,0,-1):
+				if i >= params.size(): 
+					current_faces.append_array([0,0,0])
+					continue
+				var data_params := params[i].split_floats("/")
+				data_params.resize(3)
+				current_faces.append(data_params[0] - 1)
+				current_faces.append(data_params[1] - 1)
+				current_faces.append(data_params[2] - 1)
+			
+		elif line.begins_with("o "):
+			if current_faces.size() > 0: all_faces[current_obj] = current_faces
+			current_faces = []
+			if line.length() > 2: current_obj = line.substr(2)
 	
 	if current_faces.size() > 0: all_faces[current_obj] = current_faces
 	
-	return _generate_meshes(vertices, uvs, normals, all_faces)
-
-static func _generate_meshes(
-	vertices : PackedVector3Array,
-	uvs : PackedVector2Array, 
-	normals : PackedVector3Array, 
-	faces : Dictionary
-) -> Dictionary:
 	var meshes := Dictionary()
 	
-	for key in faces:
+	for key in all_faces:
 		var mesh_vertices := PackedVector3Array()
 		var mesh_uvs := PackedVector2Array()
 		var mesh_normals := PackedVector3Array()
 		
-		for face in faces[key]:
-			mesh_vertices.append(vertices[face.x - 1])
-			mesh_uvs.append(uvs[face.y - 1])
-			mesh_normals.append(normals[face.z - 1])
+		var face : PackedInt32Array = all_faces[key]
+		
+		for i in range(0, face.size(), 3):
+			mesh_vertices.append(vertices[face[i]])
+			mesh_uvs.append(uvs[face[i+1]])
+			mesh_normals.append(normals[face[i+2]])
 		
 		var _mesh_data := []
 		_mesh_data.resize(Mesh.ARRAY_MAX)
