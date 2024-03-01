@@ -13,8 +13,15 @@ func deserialize_from(json_path : String):
 	var file_datas := _open_data_files(filebulk_path)
 	if not _validate_data_files(file_datas): return
 	
+	var gen_start_time = Time.get_ticks_usec()
+	
 	var obj_text = file_datas["OBJ"].get_as_text(true)
 	meshes = ObjSerializer.deserialize_from(obj_text)
+	
+	var gen_end_time = Time.get_ticks_usec()
+	var gen_time = (gen_end_time-gen_start_time)/1000.0
+	var gen_time_str = ("%.3f ms" % gen_time)
+	print("obj deserialization - %s" % gen_time_str)
 	
 	triles = []
 	

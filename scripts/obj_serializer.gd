@@ -3,83 +3,81 @@ class_name ObjSerializer
 # returns an array of meshes contained in OBJ text
 static func deserialize_from(text : String) -> Dictionary:
 	
-	var vertices := []
-	var uvs := []
-	var normals := []
+	var vertices := PackedVector3Array()
+	var uvs := PackedVector2Array()
+	var normals := PackedVector3Array()
 	var all_faces := Dictionary()
 	var current_faces := []
 	
-	var current_obj = ""
+	var current_obj := ""
 	
 	for line in text.split("\n"):
 		line = line.strip_edges(true, true)
 		
 		var params := line.split(" ")
+		var paramcount := params.size()
 		
 		match params[0]:
 			"o":
 				if current_faces.size() > 0: all_faces[current_obj] = current_faces
 				current_faces = []
 				if params.size() > 1: current_obj = params[1]
-			"v": 
-				vertices.append(_parse_vector3(params))
+			"v":
+				vertices.append(Vector3(
+					params[1].to_float() if paramcount > 3 else 0.0,
+					params[2].to_float() if paramcount > 3 else 0.0,
+					params[3].to_float() if paramcount > 3 else 0.0,
+				))
 			"vt": 
-				uvs.append(_parse_vector2(params))
+				uvs.append(Vector2(
+					params[1].to_float() if paramcount > 2 else 0.0,
+					params[2].to_float() if paramcount > 2 else 0.0,
+				))
 			"vn": 
-				normals.append(_parse_vector3(params))
+				normals.append(Vector3(
+					params[1].to_float() if paramcount > 3 else 0.0,
+					params[2].to_float() if paramcount > 3 else 0.0,
+					params[3].to_float() if paramcount > 3 else 0.0,
+				))
 			"f":
-				current_faces.append_array(_parse_faces(params))
+				for i in range(3):
+					# Godot uses clockwise vertex ordering, while OBJ uses counter-clockwise
+					var data_string : String = params[3-i] if (3-i) < params.size() else ""
+					var data_params := data_string.split("/")
+					var dataparamcount = data_params.size()
+					current_faces.append(Vector3i(
+						data_params[0].to_int() if dataparamcount > 0 else 0,
+						data_params[1].to_int() if dataparamcount > 1 else 0,
+						data_params[2].to_int() if dataparamcount > 2 else 0,
+					))
 	
 	if current_faces.size() > 0: all_faces[current_obj] = current_faces
 	
 	return _generate_meshes(vertices, uvs, normals, all_faces)
 
-static func _parse_vector2(params : Array) -> Vector2:
-	var vector := Vector2(0.0, 0.0)
-	if params.size() > 1 and params[1].is_valid_float(): vector.x = params[1].to_float()
-	if params.size() > 2 and params[2].is_valid_float(): vector.y = params[2].to_float()
-	return vector
-	
-static func _parse_vector3(params : Array) -> Vector3:
-	var vector := Vector3(0.0, 0.0, 0.0)
-	if params.size() > 1 and params[1].is_valid_float(): vector.x = params[1].to_float()
-	if params.size() > 2 and params[2].is_valid_float(): vector.y = params[2].to_float()
-	if params.size() > 3 and params[3].is_valid_float(): vector.z = params[3].to_float()
-	return vector
-
-static func _parse_faces(params: Array) -> Array:
-	var vectors := []
-	for i in range(3):
-		var data_string : String = params[i+1] if i <= params.size() else ""
-		var data_params := data_string.split("/")
-		var vector := Vector3i(0,0,0)
-		if data_params.size() > 0: vector.x = data_params[0].to_int()
-		if data_params.size() > 1: vector.y = data_params[1].to_int()
-		if data_params.size() > 2: vector.z = data_params[2].to_int()
-		vectors.append(vector)
-		
-	# Godot uses clockwise vertex ordering, while OBJ uses counter-clockwise
-	vectors.reverse()
-	
-	return vectors
-
 static func _generate_meshes(
-	vertices : Array, uvs : Array, normals : Array, faces : Dictionary
+	vertices : PackedVector3Array,
+	uvs : PackedVector2Array, 
+	normals : PackedVector3Array, 
+	faces : Dictionary
 ) -> Dictionary:
 	var meshes := Dictionary()
 	
 	for key in faces:
-		var _mesh_data := []
-		_mesh_data.resize(Mesh.ARRAY_MAX)
-		_mesh_data[Mesh.ARRAY_VERTEX] = PackedVector3Array()
-		_mesh_data[Mesh.ARRAY_TEX_UV] = PackedVector2Array()
-		_mesh_data[Mesh.ARRAY_NORMAL] = PackedVector3Array()
+		var mesh_vertices := PackedVector3Array()
+		var mesh_uvs := PackedVector2Array()
+		var mesh_normals := PackedVector3Array()
 		
 		for face in faces[key]:
-			_mesh_data[Mesh.ARRAY_VERTEX].append(vertices[face.x - 1])
-			_mesh_data[Mesh.ARRAY_TEX_UV].append(uvs[face.y - 1])
-			_mesh_data[Mesh.ARRAY_NORMAL].append(normals[face.z - 1])
-			
+			mesh_vertices.append(vertices[face.x - 1])
+			mesh_uvs.append(uvs[face.y - 1])
+			mesh_normals.append(normals[face.z - 1])
+		
+		var _mesh_data := []
+		_mesh_data.resize(Mesh.ARRAY_MAX)
+		_mesh_data[Mesh.ARRAY_VERTEX] = mesh_vertices
+		_mesh_data[Mesh.ARRAY_TEX_UV] = mesh_uvs
+		_mesh_data[Mesh.ARRAY_NORMAL] = mesh_normals
 		meshes[key] = _mesh_data
 	
 	return meshes
