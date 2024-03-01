@@ -32,7 +32,8 @@ func try_save():
 	pass
 
 func open_file(path : String):
-	pass
+	var serializer = TrixelSerializer.new()
+	serializer.deserialize_from(path)
 
 func _show_open_file_dialog():
 	open_file_dialog.visible = true
