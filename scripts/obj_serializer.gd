@@ -1,6 +1,7 @@
 class_name ObjSerializer
 
-# returns an array of meshes contained in OBJ text
+# Returns a list of mesh arrays contained in OBJ text,
+# interpreting each OBJ's object as a separate mesh
 static func deserialize_from(text : String) -> Dictionary:
 	
 	var vertices := PackedVector3Array()
@@ -28,16 +29,18 @@ static func deserialize_from(text : String) -> Dictionary:
 			normals.append(Vector3(values[0], values[1], values[2]))
 		elif line.begins_with("f "):
 			var params := line.split(" ", false)
-			# Godot uses clockwise vertex ordering, while OBJ uses counter-clockwise
+			# Godot uses clockwise vertex ordering, while OBJ uses counter-clockwise,
+			# so order is reversed here. Additionally, all extra vertices are ignored,
+			# as exported trixel formats are expected to be triangulated.
 			for i in range(3,0,-1):
 				if i >= params.size(): 
 					current_faces.append_array([0,0,0])
 					continue
 				var data_params := params[i].split_floats("/")
 				data_params.resize(3)
-				current_faces.append(data_params[0] - 1)
-				current_faces.append(data_params[1] - 1)
-				current_faces.append(data_params[2] - 1)
+				current_faces.append(int(data_params[0]) - 1)
+				current_faces.append(int(data_params[1]) - 1)
+				current_faces.append(int(data_params[2]) - 1)
 			
 		elif line.begins_with("o "):
 			if current_faces.size() > 0: all_faces[current_obj] = current_faces
