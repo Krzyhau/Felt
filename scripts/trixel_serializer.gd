@@ -4,6 +4,8 @@ var triles : Array
 var loaded : bool
 var last_error : String
 
+var meshes : Dictionary
+
 func deserialize_from(json_path : String):
 	
 	var filebulk_path := json_path.substr(0, json_path.length() - ".json".length())
@@ -11,7 +13,8 @@ func deserialize_from(json_path : String):
 	var file_datas := _open_data_files(filebulk_path)
 	if not _validate_data_files(file_datas): return
 	
-	
+	var obj_text = file_datas["OBJ"].get_as_text(true)
+	meshes = ObjSerializer.deserialize_from(obj_text)
 	
 	triles = []
 	

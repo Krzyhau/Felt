@@ -68,8 +68,9 @@ resource_name = "ColorToolButtons"
 [sub_resource type="ButtonGroup" id="ButtonGroup_321qh"]
 resource_name = "ColorToolButtons"
 
-[node name="editor_scene" type="Node3D" node_paths=PackedStringArray("open_discard_dialog", "exit_discard_dialog", "open_file_dialog")]
+[node name="editor_scene" type="Node3D" node_paths=PackedStringArray("trile_editor", "open_discard_dialog", "exit_discard_dialog", "open_file_dialog")]
 script = ExtResource("1_kn7am")
+trile_editor = NodePath("scene3d/trile_editor")
 open_discard_dialog = NodePath("windows/open_discard_dialog")
 exit_discard_dialog = NodePath("windows/exit_discard_dialog")
 open_file_dialog = NodePath("windows/open_file_dialog")
