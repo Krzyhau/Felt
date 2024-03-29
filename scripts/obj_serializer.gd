@@ -23,7 +23,8 @@ static func deserialize_from(text : String) -> Dictionary:
 		elif line.begins_with("vt "):
 			var values := line.substr(3).split_floats(" ", false)
 			values.resize(2)
-			uvs.append(Vector2(values[0], values[1]))
+			# uvs.append(Vector2(values[0], values[1]))
+			uvs.append(Vector2(values[0], -values[1])) # ???
 		elif line.begins_with("vn "):
 			var values := line.substr(3).split_floats(" ", false)
 			values.resize(3)
