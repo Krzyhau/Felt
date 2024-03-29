@@ -10,7 +10,6 @@ func _ready():
 	visual_boundaries = $boundaries
 	mesh_node = $mesh
 	initialize_new_trile()
-	trile.rebuild_mesh()
 
 func _process(_delta):
 	if Input.is_action_just_pressed("debug_refresh"): trile.rebuild_mesh()
@@ -65,6 +64,7 @@ func initialize_trile(new_trile : Trile):
 	mesh_node.mesh = new_trile
 	new_trile.materializer.materialized.connect(_trile_materialized)
 	visual_boundaries.scale = (trile.size as Vector3) + Vector3.ONE * 0.01
+	new_trile.rebuild_mesh()
 
 func fill(corner1 : Vector3i, corner2 : Vector3i, state: bool):
 	var smallest := Vector3i(

@@ -19,6 +19,8 @@ var dematerializer : TrileDematerializer
 var cubemap : TrileCubemap
 var material : ShaderMaterial
 
+var should_dematerialize : bool
+
 func _init(
 	trile_size : Vector3 = DEFAULT_SIZE, 
 	trile_resolution : int = DEFAULT_RESOLUTION
@@ -67,17 +69,21 @@ func _on_materialized(_trile : Trile, mesh_data : Array, _interrupted : bool):
 
 func _on_dematerialized(_trile : Trile, trixel_data : PackedByteArray, _interrupted : bool):
 	if _interrupted: return
+	should_dematerialize = false
 	buffer = trixel_data
 	rebuild_mesh()
 
 func rebuild_mesh():
-	materializer.materialize()
+	if should_dematerialize:
+		dematerializer.dematerialize()
+	else:
+		materializer.materialize()
 	
-func set_and_dematerialize_mesh(mesh_data : Array):
+func set_raw_mesh(mesh_data : Array):
 	clear_surfaces()
 	add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, mesh_data)
 	surface_set_material(0, material)
-	dematerializer.dematerialize()
+	should_dematerialize = true
 
 func get_trixel_width_along_axis(axis : Vector3i) -> int:
 	var axis_size := trixel_bounds * axis

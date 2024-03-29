@@ -34,15 +34,13 @@ func try_save():
 	pass
 
 func open_file(path : String):
+	if not path.ends_with(".fezao.json") and not path.ends_with(".fezts.json"):
+		printerr("Attempted to open file with incorrect extension, aborting.")
+		return
+	
 	var serializer = TrixelSerializer.new()
 	serializer.deserialize_from(path)
-	
-	var size_array = serializer.json["Size"]
-	var size := Vector3(size_array[0], size_array[1], size_array[2])
-	var trile := Trile.new(size)
-	
-	trile.set_and_dematerialize_mesh(serializer.meshes[serializer.meshes.keys()[0]])
-	trile_editor.initialize_trile(trile)
+	trile_editor.initialize_trile(serializer.triles.values()[0])
 
 func _show_open_file_dialog():
 	open_file_dialog.visible = true
