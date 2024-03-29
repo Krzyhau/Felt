@@ -37,10 +37,12 @@ func open_file(path : String):
 	var serializer = TrixelSerializer.new()
 	serializer.deserialize_from(path)
 	
-	var trile = trile_editor.trile
-	trile.clear_surfaces()
-	trile.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, serializer.meshes[serializer.meshes.keys()[0]])
-	trile.surface_set_material(0, trile.material)
+	var size_array = serializer.json["Size"]
+	var size := Vector3(size_array[0], size_array[1], size_array[2])
+	var trile := Trile.new(size)
+	
+	trile.set_and_dematerialize_mesh(serializer.meshes[serializer.meshes.keys()[0]])
+	trile_editor.initialize_trile(trile)
 
 func _show_open_file_dialog():
 	open_file_dialog.visible = true

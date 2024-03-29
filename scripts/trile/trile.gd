@@ -15,6 +15,7 @@ var z_index : int
 
 var buffer : PackedByteArray
 var materializer : TrileMaterializer
+var dematerializer : TrileDematerializer
 var cubemap : TrileCubemap
 var material : ShaderMaterial
 
@@ -28,6 +29,7 @@ func _init(
 	_initialize_data_buffer()
 	_initialize_cubemap_and_material()
 	_create_materializer()
+	_create_dematerializer()
 
 func _initialize_data_buffer():
 	buffer = PackedByteArray()
@@ -50,6 +52,10 @@ func _create_materializer():
 	materializer = TrileMaterializer.new(self)
 	materializer.materialized.connect(_on_materialized)
 
+func _create_dematerializer():
+	dematerializer = TrileDematerializer.new(self)
+	dematerializer.dematerialized.connect(_on_dematerialized)
+
 func _on_materialized(_trile : Trile, mesh_data : Array, _interrupted : bool):
 	if _interrupted: return
 	
@@ -59,8 +65,19 @@ func _on_materialized(_trile : Trile, mesh_data : Array, _interrupted : bool):
 		add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, mesh_data)
 		surface_set_material(0, material)
 
+func _on_dematerialized(_trile : Trile, trixel_data : PackedByteArray, _interrupted : bool):
+	if _interrupted: return
+	buffer = trixel_data
+	rebuild_mesh()
+
 func rebuild_mesh():
 	materializer.materialize()
+	
+func set_and_dematerialize_mesh(mesh_data : Array):
+	clear_surfaces()
+	add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, mesh_data)
+	surface_set_material(0, material)
+	dematerializer.dematerialize()
 
 func get_trixel_width_along_axis(axis : Vector3i) -> int:
 	var axis_size := trixel_bounds * axis

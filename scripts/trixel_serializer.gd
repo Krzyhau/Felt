@@ -5,6 +5,7 @@ var loaded : bool
 var last_error : String
 
 var meshes : Dictionary
+var json
 
 func deserialize_from(json_path : String):
 	
@@ -25,6 +26,7 @@ func deserialize_from(json_path : String):
 	
 	triles = []
 	
+	json = JSON.parse_string(file_datas["JSON"].get_as_text(true))
 	
 	loaded = true
 

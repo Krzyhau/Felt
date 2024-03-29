@@ -1,7 +1,8 @@
 class_name ObjSerializer
 
 # Returns a list of mesh arrays contained in OBJ text,
-# interpreting each OBJ's object as a separate mesh
+# interpreting each OBJ's object as a separate mesh.
+# Simplified for custom Trixel Art format reading.
 static func deserialize_from(text : String) -> Dictionary:
 	
 	var vertices := PackedVector3Array()
