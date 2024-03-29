@@ -34,8 +34,11 @@ func _fill_trixel_face(position : Vector3i, face : Trile.Face, color : Color):
 	for x in range(pixel_pos.x, pixel_endpos.x, pixel_dir.x):
 		for y in range(pixel_pos.y, pixel_endpos.y, pixel_dir.y):
 			buffer_image.set_pixel(x, y, color)
-	
-	
+
+
+func apply_external_image(img : Image):
+	set_image(img)
+	buffer_image = img
 
 func paint(position : Vector3i, face : Trile.Face, color : Color):
 	_fill_trixel_face(position, face, color)

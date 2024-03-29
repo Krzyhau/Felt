@@ -18,6 +18,8 @@ func deserialize_from(json_path : String):
 	elif filebulk_path.ends_with("fezts"):
 		_parse_trile_set(file_datas)
 	
+	for data in file_datas.values(): data.close()
+	
 	loaded = true
 
 
@@ -50,6 +52,23 @@ func _deserialize_meshes(obj : FileAccess) -> Dictionary:
 	print("obj deserialization - %s" % gen_time_str)
 	return meshes
 
+func _get_image(albedo_file : FileAccess, alpha_file : FileAccess) -> Image:
+	var albedo = Image.new()
+	albedo.load_png_from_buffer(albedo_file.get_buffer(albedo_file.get_length()))
+	
+	var alpha : Image = null
+	
+	if alpha_file != null:
+		alpha = Image.new()
+		alpha.load_png_from_buffer(alpha_file.get_buffer(alpha_file.get_length()))
+	
+	for x in albedo.get_width(): for y in albedo.get_height():
+		var albedo_color = albedo.get_pixel(x,y)
+		albedo_color.a = alpha.get_pixel(x,y).r if alpha != null else 0
+		albedo.set_pixel(x,y,albedo_color)
+	
+	return albedo
+
 func _parse_art_object(file_datas : Dictionary):
 	var meshes = _deserialize_meshes(file_datas["OBJ"])
 	var properties : Dictionary = JSON.parse_string(file_datas["JSON"].get_as_text(true))
@@ -59,6 +78,8 @@ func _parse_art_object(file_datas : Dictionary):
 	var trile := Trile.new(size)
 	
 	trile.set_raw_mesh(meshes.values()[0])
+	var image = _get_image(file_datas["PNG"], file_datas["APNG"])
+	trile.cubemap.apply_external_image(image)
 	
 	triles[0] = trile
 	

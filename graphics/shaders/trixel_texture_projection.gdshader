@@ -2,7 +2,7 @@ shader_type spatial;
 
 global uniform bool trixel_draw_emission_mask;
 
-uniform sampler2D TEXTURE : filter_nearest;
+uniform sampler2D TEXTURE : filter_nearest, source_color;
 
 uniform bool calculate_projection;
 uniform bool inner_faces;
