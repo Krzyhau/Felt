@@ -61,7 +61,7 @@ func _on_materialized(interrupted : bool):
 
 func _generate_mesh_data(mesh_arrays : Array):
 	for face in 6:
-		var layer_dir = Trile.get_face_normal(face).abs()
+		var layer_dir = Trile.get_face_normal_abs(face)
 		var layer_dir_depth = _trile.get_trixel_width_along_axis(layer_dir)
 		
 		for layer in layer_dir_depth:
@@ -75,8 +75,8 @@ func _generate_mesh_data(mesh_arrays : Array):
 # performs a greedy search on a 2D slice of a trile art to find rectangular planes
 # returns an array of planes, where each plane stores 3D position of its corner and size
 func _find_planes_in_layer(face : Trile.Face, trixel_faces : Dictionary) -> Array:
-	var dir_x := Trile.get_face_tangent(face).abs()
-	var dir_y := Trile.get_face_cotangent(face).abs()
+	var dir_x := Trile.get_face_tangent_abs(face)
+	var dir_y := Trile.get_face_cotangent_abs(face)
 
 	var layer_size_x := _trile.get_trixel_width_along_axis(dir_x)
 	var layer_size_y := _trile.get_trixel_width_along_axis(dir_y)
@@ -118,9 +118,9 @@ func _find_planes_in_layer(face : Trile.Face, trixel_faces : Dictionary) -> Arra
 
 # get a map for every unobstructed trixel face in given layer
 func _get_trixel_faces_map(face : Trile.Face, depth : int) -> Dictionary:
-	var dir_x := Trile.get_face_tangent(face).abs()
-	var dir_y := Trile.get_face_cotangent(face).abs()
-	var dir_z := Trile.get_face_normal(face).abs()
+	var dir_x := Trile.get_face_tangent_abs(face)
+	var dir_y := Trile.get_face_cotangent_abs(face)
+	var dir_z := Trile.get_face_normal_abs(face)
 
 	var layer_size_x := _trile.get_trixel_width_along_axis(dir_x)
 	var layer_size_y := _trile.get_trixel_width_along_axis(dir_y)
@@ -142,10 +142,13 @@ func _get_trixel_faces_map(face : Trile.Face, depth : int) -> Dictionary:
 	var has_top := depth + 1 < layer_size_z
 	var face_z_pos := dir_z * abs_depth
 	
-	for x in layer_size_x: for y in layer_size_y:
-		if buffer[x * x_index + y * y_index + z_offset] \
-		and not (has_top and buffer[x * x_index + y * y_index + z_top_offset]):
-			trixel_faces[x * dir_x + y * dir_y + face_z_pos] = true
+	for x in layer_size_x: 
+		var partial_trixel_index := x * x_index + z_offset
+		var partial_top_trixel_index := x * x_index + z_top_offset
+		for y in layer_size_y:
+			if buffer[y * y_index + partial_trixel_index] \
+			and not (has_top and buffer[y * y_index + partial_top_trixel_index]):
+				trixel_faces[x * dir_x + y * dir_y + face_z_pos] = true
 		
 	return trixel_faces
 

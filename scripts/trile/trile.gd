@@ -141,6 +141,17 @@ static func get_face_normal(face : Face) -> Vector3i:
 	]
 	return normal_lookup[face]
 
+static func get_face_normal_abs(face : Face) -> Vector3i:
+	const normal_lookup := [
+		Vector3i.BACK,    # Face.FRONT
+		Vector3i.BACK,    # Face.BACK
+		Vector3i.UP,      # Face.TOP
+		Vector3i.UP,      # Face.BOTTOM
+		Vector3i.RIGHT,   # Face.LEFT
+		Vector3i.RIGHT,   # Face.RIGHT
+	]
+	return normal_lookup[face]
+
 static func get_face_tangent(face : Face) -> Vector3i:
 	const tangent_lookup := [
 		Vector3i.UP,      # Face.FRONT
@@ -151,7 +162,10 @@ static func get_face_tangent(face : Face) -> Vector3i:
 		Vector3i.BACK,    # Face.RIGHT
 	]
 	return tangent_lookup[face]
-	
+
+static func get_face_tangent_abs(face : Face) -> Vector3i:
+	return get_face_tangent(face)
+
 static func get_face_cotangent(face : Face) -> Vector3i:
 	const cotangent_lookup := [
 		Vector3i.RIGHT,   # Face.FRONT
@@ -162,6 +176,9 @@ static func get_face_cotangent(face : Face) -> Vector3i:
 		Vector3i.UP,      # Face.RIGHT
 	]
 	return cotangent_lookup[face]
+
+static func get_face_cotangent_abs(face : Face) -> Vector3i:
+	return get_face_cotangent(face)
 
 static func face_from_normal(vec : Vector3i) -> Face:
 	const face_lookup := [
