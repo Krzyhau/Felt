@@ -3,3 +3,6 @@
 
 # build app ignore
 build/
+
+# built extension libraries (for user to rebuild them themselves)
+bin/libfelt*

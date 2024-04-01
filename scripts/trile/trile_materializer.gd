@@ -18,6 +18,7 @@ func materialize():
 	_generation_stopped = false
 	_generation_thread = Thread.new()
 	_generation_thread.start(_generate_mesh)
+	_generation_thread.wait_to_finish()
 
 func interrupt_if_active():
 	if _generation_thread:
@@ -136,22 +137,24 @@ func _get_trixel_faces_map(face : Trile.Face, depth : int) -> Dictionary:
 	var z_offset := abs_depth * z_index
 	var z_top_offset := z_offset + depth_offset * z_index
 
-	var trixel_faces := Dictionary()
+	var processor := TrixelProcessor.new()
 	
-	var buffer := _trile.buffer
 	var has_top := depth + 1 < layer_size_z
 	var face_z_pos := dir_z * abs_depth
 	
-	for x in layer_size_x: 
-		var partial_trixel_index := x * x_index + z_offset
-		var partial_top_trixel_index := x * x_index + z_top_offset
-		for y in layer_size_y:
-			if buffer[y * y_index + partial_trixel_index] \
-			and not (has_top and buffer[y * y_index + partial_top_trixel_index]):
-				trixel_faces[x * dir_x + y * dir_y + face_z_pos] = true
-		
-	return trixel_faces
-
+	return processor.get_trixel_faces_map(
+		_trile.buffer,
+		layer_size_x,
+		layer_size_y,
+		x_index,
+		y_index,
+		z_offset,
+		z_top_offset,
+		has_top,
+		dir_x,
+		dir_y,
+		face_z_pos
+	)
 
 func _add_plane_to_mesh(
 	mesh_arrays : Array, 
