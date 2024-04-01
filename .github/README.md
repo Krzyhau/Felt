@@ -32,7 +32,13 @@ FEZ distinguishes two types of trixel-arts: **triles** and **art objects**.
 - [ ] Trile properties configuration (name, size, actor type)
 - [ ] Manipulation of trixel regions (selection, moving, rotating, flipping, copy-pasting)
 - [ ] Saving and loading trilesets and art objects with appended trixel data
-- [ ] Importing trilesets and art objects by generating trixel data from mesh
+- [X] Importing trilesets and art objects by generating trixel data from mesh
 - [ ] Gallery of triles (for trile sets) and switching between them
-- [ ] Different preview modes (wireframe, flat, shaded)
+- [X] Different preview modes (wireframe, flat, shaded)
 - [ ] Helper construction tools (like mirror mode)
+
+# Building
+
+The top-most directory of this repository functions as a Godot project. However, in order for it to work properly, you have to compile GDExtension library first, using SConstruct. For that, you should be able to simply run `scons` command in both `extensions/godot-cpp` and `extensions` directories. If that fails, roughly follow the [Building the C++ bindings](https://docs.godotengine.org/en/stable/tutorials/scripting/gdextension/gdextension_cpp_example.html#building-the-c-bindings) and [Compiling the plugin](https://docs.godotengine.org/en/stable/tutorials/scripting/gdextension/gdextension_cpp_example.html#compiling-the-plugin) sections of the GDExtension guide for potential solutions.
+
+Once building is done, appropriate `libfelt` binaries should be in the `bin` directory of the Godot project.
