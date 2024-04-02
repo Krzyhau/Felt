@@ -1,4 +1,4 @@
-[gd_scene load_steps=33 format=3 uid="uid://bu7kws1bt3n66"]
+[gd_scene load_steps=35 format=3 uid="uid://bu7kws1bt3n66"]
 
 [ext_resource type="Shader" path="res://graphics/shaders/boundaries.gdshader" id="1_fbdyu"]
 [ext_resource type="Script" path="res://scripts/orbiting_camera.gd" id="1_h65aw"]
@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://scripts/trile_editor.gd" id="2_lpmdn"]
 [ext_resource type="Script" path="res://scripts/trixel_tools/trixel_painter.gd" id="5_0ug6d"]
 [ext_resource type="Shader" path="res://graphics/shaders/vignette.gdshader" id="5_847bu"]
+[ext_resource type="Shader" path="res://graphics/shaders/trixel_material.gdshader" id="6_ohbp1"]
 [ext_resource type="Script" path="res://scripts/trixel_tools/trixel_placer.gd" id="7_nk0l3"]
 [ext_resource type="FontFile" uid="uid://bvsruta6u47fy" path="res://resources/fonts/righteous.ttf" id="9_g152l"]
 [ext_resource type="Script" path="res://scripts/ui/ui_mouse_zone.gd" id="9_ohhbn"]
@@ -35,6 +36,10 @@ flip_faces = true
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_5bqro"]
 render_priority = 0
 shader = ExtResource("1_fbdyu")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_htkqh"]
+render_priority = 0
+shader = ExtResource("6_ohbp1")
 
 [sub_resource type="BoxMesh" id="BoxMesh_s4cgk"]
 
@@ -116,6 +121,7 @@ skeleton = NodePath("../../..")
 surface_material_override/0 = SubResource("ShaderMaterial_5bqro")
 
 [node name="mesh" type="CSGMesh3D" parent="scene3d/trile_editor"]
+material = SubResource("ShaderMaterial_htkqh")
 
 [node name="trixel_placer" type="Node3D" parent="scene3d" node_paths=PackedStringArray("trile_editor", "debug_label", "primary_action_button", "secondary_action_button")]
 script = ExtResource("7_nk0l3")

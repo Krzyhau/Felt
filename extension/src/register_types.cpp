@@ -1,6 +1,9 @@
 #include "register_types.h"
 
-#include "trixel_processor.h"
+#include "trile.h"
+#include "trile_materializer.h"
+#include "trile_dematerializer.h"
+#include "trile_cubemap.h"
 
 #include <gdextension_interface.h>
 #include <godot_cpp/core/defs.hpp>
@@ -15,7 +18,8 @@ void initialize_felt_module(ModuleInitializationLevel p_level)
         return;
     }
 
-    ClassDB::register_class<TrixelProcessor>();
+    ClassDB::register_class<Trile>();
+    ClassDB::register_class<TrileCubemap>();
 }
 
 void uninitialize_felt_module(ModuleInitializationLevel p_level)

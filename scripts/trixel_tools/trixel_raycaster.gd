@@ -3,7 +3,7 @@ class_name TrixelRaycaster
 class Result:
 	var hit_trixel : bool
 	var hit_wall : bool
-	var face : Trile.Face
+	var face : int
 	var position : Vector3i
 
 static func cast_in_trile_space(trile : Trile, start : Vector3, dir : Vector3) -> Result:
@@ -61,6 +61,6 @@ static func cast_in_trile_space(trile : Trile, start : Vector3, dir : Vector3) -
 static func try_hit_trixel_bounds(
 	trile : Trile, start : Vector3, dir : Vector3
 ):
-	var size := trile.trixel_bounds as Vector3
+	var size := trile.get_trixel_bounds() as Vector3
 	var trile_aabb := AABB(Vector3.ZERO, size)
 	return trile_aabb.intersects_segment(start, start + dir * 1000)

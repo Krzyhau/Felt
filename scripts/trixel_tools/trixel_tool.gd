@@ -18,7 +18,7 @@ var _current_mouse_position : Vector2
 var _selecting : bool
 var _use_selection_resizing : bool
 var _last_trixel_position : Vector3i
-var _last_trixel_face : Trile.Face
+var _last_trixel_face : int
 var _selection_start_trixel_pos : Vector3i
 var _aiming_at_trile : bool
 var _use_alt_tool : bool
@@ -97,7 +97,7 @@ func _update_cursor():
 		minf(start_pos.y, end_pos.y) - cursor_oversize,
 		minf(start_pos.z, end_pos.z) - cursor_oversize,
 	)
-	var min_size := Vector3.ONE / trile_editor.trile.resolution
+	var min_size := Vector3.ONE / trile_editor.trile.get_resolution()
 	var oversize_scale := Vector3.ONE * cursor_oversize * 2.0
 	self.scale = min_size + oversize_scale + (end_pos - start_pos).abs()
 	

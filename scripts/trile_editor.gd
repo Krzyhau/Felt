@@ -14,79 +14,27 @@ func _ready():
 func _process(_delta):
 	if Input.is_action_just_pressed("debug_refresh"): trile.rebuild_mesh()
 
-func _trile_materialized(_trile : Trile, _mesh_data : Array, interrupted : bool):
-	if not interrupted: 
-		_clear_csg_fillers()
-
-func _create_csg_filler(mins : Vector3, maxs : Vector3, state : bool):
-	var box := CSGBox3D.new()
-	
-	var resolution := trile.resolution
-	
-	var region_size := (maxs - mins + Vector3.ONE)
-	var region_midpoint := (mins + maxs + Vector3.ONE) * 0.5
-	
-	box.scale = region_size / trile.resolution
-	box.position = region_midpoint / trile.resolution - Vector3.ONE * (trile.size / 2.0)
-	box.operation = CSGShape3D.OPERATION_UNION if state else CSGShape3D.OPERATION_SUBTRACTION
-
-	box.material = _create_material_for_csg_filler(box)
-	
-	mesh_node.add_child(box)
-	temporary_csg_fillers.append(box)
-
-func _create_material_for_csg_filler(box : CSGBox3D) -> ShaderMaterial:
-	var inner_faces := box.operation == CSGShape3D.OPERATION_SUBTRACTION
-	var trile_size := (trile.size as Vector3)
-	var size := box.scale / trile_size
-	var offset := (box.position / trile_size) + Vector3.ONE * 0.5
-	
-	var material := ShaderMaterial.new()
-	material.shader = trile.material.shader
-	material.set_shader_parameter("TEXTURE", trile.cubemap)
-	material.set_shader_parameter("calculate_projection", true)
-	material.set_shader_parameter("inner_faces", inner_faces)
-	material.set_shader_parameter("size", size)
-	material.set_shader_parameter("offset", offset)
-	return material
-
-func _clear_csg_fillers():
-	for filler in temporary_csg_fillers:
-		filler.queue_free()
-	temporary_csg_fillers.clear()
-
 func initialize_new_trile():
-	initialize_trile(Trile.new())
-	fill(Vector3i.ZERO, trile.trixel_bounds - Vector3i.ONE, true)
+	var new_trile = Trile.create(Vector3.ONE, 16);
+	new_trile.fill_trixels(Vector3i.ZERO, new_trile.get_trixel_bounds() - Vector3i.ONE, true)
+	initialize_trile(new_trile)
 
 func initialize_trile(new_trile : Trile):
 	self.trile = new_trile
+	new_trile.set_material(mesh_node.material)
 	mesh_node.mesh = new_trile
-	new_trile.materializer.materialized.connect(_trile_materialized)
-	visual_boundaries.scale = (trile.size as Vector3) + Vector3.ONE * 0.01
-	new_trile.rebuild_mesh()
+	visual_boundaries.scale = (trile.get_size() as Vector3) + Vector3.ONE * 0.01
+	trile.rebuild_mesh()
 
 func fill(corner1 : Vector3i, corner2 : Vector3i, state: bool):
-	var smallest := Vector3i(
-		min(corner1.x, corner2.x),
-		min(corner1.y, corner2.y),
-		min(corner1.z, corner2.z),
-	)
-	var largest := Vector3i(
-		max(corner1.x, corner2.x),
-		max(corner1.y, corner2.y),
-		max(corner1.z, corner2.z),
-	)
-	
-	trile.fill_trixels(smallest, largest, state)
-	_create_csg_filler(smallest, largest, state)
+	trile.fill_trixels(corner1, corner2, state)
 
-func paint(pos : Vector3i, face : Trile.Face, color : Color, fill_mode : bool):
-	if fill_mode: trile.cubemap.fill(pos, face, color)
-	else: trile.cubemap.paint(pos, face, color)
+func paint(pos : Vector3i, face : int, color : Color, fill_mode : bool):
+	if fill_mode: trile.get_cubemap().flood_fill(pos, face, color)
+	else: trile.get_cubemap().paint(pos, face, color)
 
-func pick_color(pos : Vector3i, face : Trile.Face) -> Color:
-	return trile.cubemap.pick_color(pos, face)
+func pick_color(pos : Vector3i, face : int) -> Color:
+	return trile.get_cubemap().pick_color(pos, face)
 
 func get_global_to_trixel(global_pos : Vector3) -> Vector3:
 	return trile.local_to_trixel(self.to_local(global_pos))

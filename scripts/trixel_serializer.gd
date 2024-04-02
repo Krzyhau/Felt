@@ -75,11 +75,11 @@ func _parse_art_object(file_datas : Dictionary):
 	
 	var size_array = properties["Size"]
 	var size := Vector3(size_array[0], size_array[1], size_array[2])
-	var trile := Trile.new(size)
+	var trile := Trile.create(size, 16)
 	
 	trile.set_raw_mesh(meshes.values()[0])
 	var image = _get_image(file_datas["PNG"], file_datas["APNG"])
-	trile.cubemap.apply_external_image(image)
+	trile.get_cubemap().apply_external_image(image)
 	
 	triles[0] = trile
 	
@@ -93,6 +93,6 @@ func _parse_trile_set(file_datas : Dictionary):
 		var size_array = properties["Triles"][trile_id]["Size"]
 		var size := Vector3(size_array[0], size_array[1], size_array[2])
 		
-		var trile := Trile.new(size)
+		var trile := Trile.create(size, 16)
 		trile.set_raw_mesh(meshes[trile_id])
 		triles[trile_id] = trile

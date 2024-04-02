@@ -40,4 +40,12 @@ func on_selection_finalized():
 	var start := _selection_start_trixel_pos
 	var end := _last_trixel_position
 	trile_editor.fill(start, end, mode == Mode.PRIMARY)
+	
+	var gen_start_time = Time.get_ticks_usec()
+	
 	trile_editor.trile.rebuild_mesh()
+	
+	var gen_end_time = Time.get_ticks_usec()
+	var gen_time = (gen_end_time-gen_start_time)/1000.0
+	var gen_time_str = ("%.3f ms" % gen_time)
+	print("rebuild_mesh() - %s" % gen_time_str)
