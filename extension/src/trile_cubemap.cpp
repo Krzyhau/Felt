@@ -174,7 +174,7 @@ Vector2 TrileCubemap::trile_coords_to_uv(const Vector3 coords, const Trile::Face
 
 int TrileCubemap::get_face_texture_x_offset(const Trile::Face face)
 {
-    const int offset_lookup[] = {
+    static const int offset_lookup[] = {
         0, // FRONT
         3, // BACK
         4, // TOP
@@ -187,7 +187,7 @@ int TrileCubemap::get_face_texture_x_offset(const Trile::Face face)
 
 Vector3 TrileCubemap::get_face_texture_tangent(const Trile::Face face)
 {
-    const Vector3 tangent_lookup[] = {
+    static const Vector3 tangent_lookup[] = {
         Vector3(1, 0, 0), // FRONT
         Vector3(-1, 0, 0), // BACK
         Vector3(1, 0, 0), // TOP
@@ -200,7 +200,7 @@ Vector3 TrileCubemap::get_face_texture_tangent(const Trile::Face face)
 
 Vector3 TrileCubemap::get_face_texture_cotangent(const Trile::Face face)
 {
-    const Vector3 cotangent_lookup[] = {
+    static const Vector3 cotangent_lookup[] = {
         Vector3(0, 1, 0),  // FRONT
         Vector3(0, 1, 0), // BACK
         Vector3(0, 0, 1),  // TOP

@@ -6,12 +6,13 @@ using namespace godot;
 TrileDematerializer::TrileDematerializer(Ref<Trile> trile)
 {
     _trile = trile;
-    _sandwich_data = new SandwichState[_trile->get_trixels_count()];
+    _sandwich_data = {NONE};
+    _sandwich_data.resize(_trile->get_trixels_count());
 }
 
 TrileDematerializer::~TrileDematerializer()
 {
-    delete _sandwich_data;
+
 }
 
 void TrileDematerializer::dematerialize()
@@ -92,7 +93,7 @@ void TrileDematerializer::_populate_sandwich_data()
 
 void TrileDematerializer::_rasterize_trile_mesh()
 {
-    bool* buffer = _trile->get_raw_trixel_buffer();
+    auto& buffer = _trile->get_raw_trixel_buffer();
 
     SandwichState state;
     for (int i = 0; i< _trile->get_trixels_count(); i++)

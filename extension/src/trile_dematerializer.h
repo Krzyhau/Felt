@@ -19,7 +19,7 @@ namespace godot {
 
     private:
         Ref<Trile> _trile;
-        SandwichState *_sandwich_data;
+        std::vector<SandwichState> _sandwich_data;
 
     public:
         TrileDematerializer(Ref<Trile> trile);

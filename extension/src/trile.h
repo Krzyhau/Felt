@@ -29,7 +29,7 @@ namespace godot
         Ref<TrileCubemap> _cubemap;
 
     private:
-        bool *_buffer;
+        std::vector<bool> _buffer;
         int _resolution;
         Vector3 _size;
         Vector3i _trixel_bounds;
@@ -39,7 +39,7 @@ namespace godot
         int _z_index;
 
     public:
-        bool *get_raw_trixel_buffer();
+        std::vector<bool>& get_raw_trixel_buffer();
         PackedByteArray get_trixel_buffer();
         void set_trixel_buffer(const PackedByteArray buffer);
         int get_resolution();

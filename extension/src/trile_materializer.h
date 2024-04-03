@@ -9,7 +9,12 @@ namespace godot {
     class TrileMaterializer {
     
     private:
-        struct Plane
+        struct LayerPlane {
+            Vector2i pos;
+            Vector2i size;
+        };
+
+        struct TrixelPlane
         {
             Vector3i pos;
             Vector2i size;
@@ -25,9 +30,9 @@ namespace godot {
         void materialize();
     private:
         Array _create_materialized_mesh();
-        std::set<Vector3i> _get_trixel_faces_map(Trile::Face face, int depth);
-        std::list<Plane> _find_planes_in_layer(Trile::Face face, int depth);
-        void _add_plane_to_mesh(const Plane plane, std::vector<Vector3>& mesh_vertices, std::vector<Vector2>& mesh_uvs);
+        std::list<TrixelPlane> _find_planes_in_layer(Trile::Face face, int depth);
+        std::list<LayerPlane> _greedy_mesh_planes_in_layer(std::vector<bool> layer_map, int width, int height);
+        void _add_plane_to_mesh(const TrixelPlane plane, std::vector<Vector3>& mesh_vertices, std::vector<Vector2>& mesh_uvs);
     };
 }
 

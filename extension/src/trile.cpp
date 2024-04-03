@@ -56,7 +56,6 @@ Trile::Trile()
 
 Trile::~Trile()
 {
-    delete _buffer;
 }
 
 Ref<Trile> Trile::create(const Vector3 trile_size, const int trile_resolution)
@@ -71,7 +70,7 @@ Ref<Trile> Trile::create(const Vector3 trile_size, const int trile_resolution)
     return trile;
 }
 
-bool* Trile::get_raw_trixel_buffer()
+std::vector<bool>& Trile::get_raw_trixel_buffer()
 {
     return _buffer;
 }
@@ -153,7 +152,8 @@ void Trile::set_material(Ref<ShaderMaterial> material)
 
 void Trile::_initialize_data_buffer()
 {
-    _buffer = new bool[_trixels_count];
+    _buffer = {false};
+    _buffer.resize(_trixels_count);
 }
 
 void Trile::_set_size_snapped_to_grid(Vector3 size)
@@ -187,10 +187,11 @@ void Trile::rebuild_mesh()
 
 void Trile::set_raw_mesh(const Array mesh_data)
 {
+    clear_surfaces();
+
     auto vertices = (PackedVector3Array)mesh_data[Mesh::ARRAY_VERTEX];
     if (vertices.size() == 0) return;
 
-    clear_surfaces();
     add_surface_from_arrays(PRIMITIVE_TRIANGLES, mesh_data);
     if (_material.is_valid()) {
         surface_set_material(0, _material);
@@ -281,7 +282,7 @@ Vector3 Trile::local_to_trixel(const Vector3 local_pos)
 
 Vector3i Trile::get_face_normal(const Trile::Face face)
 {
-    const Vector3i normal_lookup[] = {
+    static const Vector3i normal_lookup[] = {
         Vector3i(0, 0, 1), // FRONT
         Vector3i(0, 0, -1), // BACK
         Vector3i(0, 1, 0), // TOP
@@ -299,7 +300,7 @@ Vector3i Trile::get_face_normal_abs(const Trile::Face face)
 
 Vector3i Trile::get_face_tangent(const Trile::Face face)
 {
-    const Vector3i tangent_lookup[] = {
+    static const Vector3i tangent_lookup[] = {
         Vector3i(0, 1, 0), // FRONT
         Vector3i(0, 1, 0), // BACK
         Vector3i(1, 0, 0), // TOP
@@ -317,7 +318,7 @@ Vector3i Trile::get_face_tangent_abs(const Trile::Face face)
 
 Vector3i Trile::get_face_cotangent(const Trile::Face face)
 {
-    const Vector3i tangent_lookup[] = {
+    static const Vector3i tangent_lookup[] = {
         Vector3i(1, 0, 0), // FRONT
         Vector3i(1, 0, 0), // BACK
         Vector3i(0, 0, 1), // TOP
@@ -335,7 +336,7 @@ Vector3i Trile::get_face_cotangent_abs(const Trile::Face face)
 
 Trile::Face Trile::face_from_normal(const Vector3i normal)
 {
-    const Face face_lookup[] = {
+    static const Face face_lookup[] = {
         BACK, 
         BOTTOM,
         LEFT,
@@ -353,13 +354,13 @@ Trile::Face Trile::face_from_normal(const Vector3i normal)
 
 String Trile::get_face_name(const Face face)
 {
-    const String face_names[] = { "Front", "Back", "Top", "bottom", "Left", "Right"};
+    static const String face_names[] = { "Front", "Back", "Top", "bottom", "Left", "Right"};
     return face_names[face];
 }
 
 Vector3 Trile::get_face_rotation_degrees(const Face face)
 {
-    const Vector3 rotation_lookup[] = {
+    static const Vector3 rotation_lookup[] = {
         Vector3(0, 0, 0), // FRONT
         Vector3(0, 180, 0), // BACK
         Vector3(-90, 0, 0), // TOP
