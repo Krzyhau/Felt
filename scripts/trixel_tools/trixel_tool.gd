@@ -40,7 +40,8 @@ func _register_button(button : Button, assigned_mode : Mode):
 func _on_button_toggled(assigned_mode : Mode, toggled_on : bool):
 	if toggled_on:
 		mode = assigned_mode
-		_use_alt_tool = true if assigned_mode == Mode.ALT_PRIMARY else false
+		if assigned_mode == Mode.PRIMARY: _use_alt_tool = false
+		if assigned_mode == Mode.ALT_PRIMARY: _use_alt_tool = true
 	elif mode == assigned_mode:
 		mode = Mode.NONE
 
