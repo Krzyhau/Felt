@@ -6,7 +6,7 @@ class_name ColorPickerPopup extends Panel
 @onready var color_picker : ColorPicker = $arrangement/color_picker
 @onready var emission_slider : HSlider = $arrangement/emission_controls/slider
 @onready var emission_value : SpinBox = $arrangement/emission_controls/value
-@onready var color_buttons : Container = $arrangement/color_buttons
+@onready var recent_color_buttons : Container = $arrangement/color_buttons
 
 var _active_button : ColorButton
 
@@ -22,6 +22,11 @@ func _ready() -> void:
 	secondary_color_button.toggled.connect(func(state:bool): 
 		_on_color_button_pressed(secondary_color_button, state)
 	)
+	
+	for i in range(recent_color_buttons.get_child_count()):
+		var button := recent_color_buttons.get_child(i) as ColorButton
+		button.pressed.connect(func(): _on_recent_color_button_pressed(button))
+	
 	get_viewport().gui_focus_changed.connect(_on_focus_changed)
 
 func _on_color_button_pressed(button : ColorButton, state : bool):
@@ -42,6 +47,9 @@ func _on_color_button_pressed(button : ColorButton, state : bool):
 		secondary_color_button.set_pressed_no_signal(false)
 	if button == secondary_color_button: 
 		primary_color_button.set_pressed_no_signal(false)
+
+func _on_recent_color_button_pressed(button: ColorButton):
+	_active_button.color = button.color
 
 func _on_focus_changed(control:Control) -> void:
 	var self_has_focus = self.is_ancestor_of(control)
@@ -67,18 +75,15 @@ func _push_recent_color():
 	var color_to_add := color_picker.color
 	color_to_add.a8 = emission_value.value as int
 	
-	var recent_count := color_buttons.get_child_count()
-	var shift_index := 0
-	
-	for i in range(recent_count-1):
-		var button := color_buttons.get_child(i) as ColorButton
-		if button.color == color_to_add: break
-		else: shift_index += 1
+	var recent_buttons_count := recent_color_buttons.get_child_count()
+	for i in range(recent_buttons_count):
+		var button := recent_color_buttons.get_child(i) as ColorButton
+		if button.color == color_to_add: return
 		
-	for i in range(shift_index, 0, -1):
-		var current_button := color_buttons.get_child(i) as ColorButton
-		var previous_button := color_buttons.get_child(i-1) as ColorButton
-		current_button.color = previous_button.color
+	for i in range(recent_buttons_count - 1, 0, -1):
+		var current_button := recent_color_buttons.get_child(i) as ColorButton
+		var last_button := recent_color_buttons.get_child(i-1) as ColorButton
+		current_button.color = last_button.color
 	
-	var first := color_buttons.get_child(0) as ColorButton
+	var first := recent_color_buttons.get_child(0) as ColorButton
 	first.color = color_to_add
