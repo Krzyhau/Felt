@@ -34,7 +34,8 @@ TrileCubemap::~TrileCubemap()
 
 Ref<TrileCubemap> TrileCubemap::create(Ref<Trile> trile)
 {
-    auto cubemap = Ref<TrileCubemap>(memnew(TrileCubemap));
+    Ref<TrileCubemap> cubemap;
+    cubemap.instantiate();
     cubemap->_trile = trile;
     cubemap->_generate_image();
     return cubemap;

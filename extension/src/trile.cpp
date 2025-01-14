@@ -52,6 +52,14 @@ void Trile::_bind_methods()
 
 Trile::Trile()
 {
+    _should_dematerialize = false;
+    _resolution = 0;
+    _size = Vector3();
+    _trixel_bounds = Vector3i();
+    _trixels_count = 0;
+    _x_index = 0;
+    _y_index = 0;
+    _z_index = 0;
 }
 
 Trile::~Trile()
@@ -60,7 +68,8 @@ Trile::~Trile()
 
 Ref<Trile> Trile::create(const Vector3 trile_size, const int trile_resolution)
 {
-    auto trile = Ref<Trile>(memnew(Trile));
+    Ref<Trile> trile;
+    trile.instantiate();
     trile->_resolution = trile_resolution;
     trile->_set_size_snapped_to_grid(trile_size);
     trile->_recalculate_constants();
