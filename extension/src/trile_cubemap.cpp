@@ -27,7 +27,7 @@ TrileCubemap::TrileCubemap()
 
 TrileCubemap::~TrileCubemap()
 {
-    if(_buffer_image.is_valid()){
+    if (_buffer_image.is_valid()) {
         _buffer_image.unref();
     }
 }
@@ -55,7 +55,9 @@ void TrileCubemap::_generate_image()
 void TrileCubemap::_fill_trixel_face(const Vector3i position, const Trile::Face face, const Color color)
 {
     auto pixel_pos = trixel_coords_to_texture_coords(position, face);
-    if (_buffer_image->get_pixelv(pixel_pos) == color) return;
+    if (_buffer_image->get_pixelv(pixel_pos) == color) {
+        return;
+    }
 
     auto texture_tangent = Trile::get_face_tangent(face);
     auto texture_cotangent = Trile::get_face_cotangent(face);
@@ -65,10 +67,8 @@ void TrileCubemap::_fill_trixel_face(const Vector3i position, const Trile::Face 
 
     auto pixel_dir = (pixel_endpos - pixel_pos).sign();
 
-    for (int x = pixel_pos.x; x != pixel_endpos.x; x += pixel_dir.x)
-    {
-        for (int y = pixel_pos.y; y != pixel_endpos.y; y += pixel_dir.y)
-        {
+    for (int x = pixel_pos.x; x != pixel_endpos.x; x += pixel_dir.x) {
+        for (int y = pixel_pos.y; y != pixel_endpos.y; y += pixel_dir.y) {
             _buffer_image->set_pixel(x, y, color);
         }
     }
@@ -90,7 +90,9 @@ void TrileCubemap::paint(const Vector3i position, const Trile::Face face, const 
 void TrileCubemap::flood_fill(const Vector3i position, const Trile::Face face, const Color color)
 {
     auto existing_color = pick_color(position, face);
-    if (existing_color == color) return;
+    if (existing_color == color) {
+        return;
+    }
 
     std::set<Vector3i> triles_to_fill;
     std::set<Vector3i> propagation_triles;
@@ -100,27 +102,27 @@ void TrileCubemap::flood_fill(const Vector3i position, const Trile::Face face, c
 
     propagation_triles.insert(position);
 
-    while (!propagation_triles.empty()){
-        for(auto pos : propagation_triles){
+    while (!propagation_triles.empty()) {
+        for (auto pos : propagation_triles) {
             triles_to_fill.insert(pos);
         }
 
         std::set<Vector3i> new_propagation_triles;
 
-        for(auto pos : propagation_triles){
+        for (auto pos : propagation_triles) {
             std::set<Vector3i> neighbours = {
                 pos + tangent_vector,
                 pos - tangent_vector,
                 pos + cotangent_vector,
                 pos - cotangent_vector
             };
-            for (auto newpos : neighbours){
-                if(
-                    triles_to_fill.find(newpos) == triles_to_fill.end() &&
-                    new_propagation_triles.find(newpos) == new_propagation_triles.end() &&
-                    _trile->is_trixel_face_solid(newpos, face) &&
-                    pick_color(newpos, face) == existing_color
-                ){
+
+            for (auto newpos : neighbours) {
+                if (
+                        triles_to_fill.find(newpos) == triles_to_fill.end() &&
+                        new_propagation_triles.find(newpos) == new_propagation_triles.end() &&
+                        _trile->is_trixel_face_solid(newpos, face) &&
+                        pick_color(newpos, face) == existing_color) {
                     new_propagation_triles.insert(newpos);
                 }
             }
@@ -128,7 +130,7 @@ void TrileCubemap::flood_fill(const Vector3i position, const Trile::Face face, c
         propagation_triles = new_propagation_triles;
     }
 
-    for (auto pos : triles_to_fill){
+    for (auto pos : triles_to_fill) {
         _fill_trixel_face(pos, face, color);
     }
     set_image(_buffer_image);
@@ -168,7 +170,10 @@ Vector2 TrileCubemap::trile_coords_to_uv(const Vector3 coords, const Trile::Face
     x_coord = (x_coord + texture_offset_x) / 6.0f;
 
     auto y_coord = texture_plane_pos.dot(cotangent);
-    if(face != Trile::Face::TOP) y_coord = 1.0f - y_coord;
+
+    if (face != Trile::Face::TOP) {
+        y_coord = 1.0f - y_coord;
+    }
 
     return Vector2(x_coord, y_coord);
 }
@@ -181,7 +186,7 @@ int TrileCubemap::get_face_texture_x_offset(const Trile::Face face)
         4, // TOP
         5, // BOTTOM
         3, // LEFT
-        2  // RIGHT
+        2 // RIGHT
     };
     return offset_lookup[face];
 }
@@ -202,11 +207,11 @@ Vector3 TrileCubemap::get_face_texture_tangent(const Trile::Face face)
 Vector3 TrileCubemap::get_face_texture_cotangent(const Trile::Face face)
 {
     static const Vector3 cotangent_lookup[] = {
-        Vector3(0, 1, 0),  // FRONT
+        Vector3(0, 1, 0), // FRONT
         Vector3(0, 1, 0), // BACK
-        Vector3(0, 0, 1),  // TOP
-        Vector3(0, 0, 1),  // BOTTOM
-        Vector3(0, 1, 0),  // LEFT
+        Vector3(0, 0, 1), // TOP
+        Vector3(0, 0, 1), // BOTTOM
+        Vector3(0, 1, 0), // LEFT
         Vector3(0, 1, 0), // RIGHT
     };
     return cotangent_lookup[face];

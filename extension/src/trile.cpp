@@ -1,9 +1,9 @@
 #include "trile.h"
 #include "trile_cubemap.h"
-#include "trile_materializer.h"
 #include "trile_dematerializer.h"
-#include <godot_cpp/core/class_db.hpp>
+#include "trile_materializer.h"
 #include <godot_cpp/classes/shader_material.hpp>
+#include <godot_cpp/core/class_db.hpp>
 
 using namespace godot;
 
@@ -79,7 +79,7 @@ Ref<Trile> Trile::create(const Vector3 trile_size, const int trile_resolution)
     return trile;
 }
 
-std::vector<bool>& Trile::get_raw_trixel_buffer()
+std::vector<bool> &Trile::get_raw_trixel_buffer()
 {
     return _buffer;
 }
@@ -88,7 +88,7 @@ PackedByteArray Trile::get_trixel_buffer()
 {
     PackedByteArray array;
     array.resize(_trixels_count);
-    for(int i = 0; i < _trixels_count; i++){
+    for (int i = 0; i < _trixels_count; i++) {
         array.push_back(_buffer[i]);
     }
     return array;
@@ -96,8 +96,7 @@ PackedByteArray Trile::get_trixel_buffer()
 
 void godot::Trile::set_trixel_buffer(const PackedByteArray buffer)
 {
-    for (int i = 0; i < MIN(_trixels_count, buffer.size()); i++)
-    {
+    for (int i = 0; i < MIN(_trixels_count, buffer.size()); i++) {
         _buffer[i] = buffer[i];
     }
 }
@@ -147,11 +146,10 @@ Ref<ShaderMaterial> Trile::get_material()
     return _material;
 }
 
-void Trile::set_material(Ref<ShaderMaterial> material) 
+void Trile::set_material(Ref<ShaderMaterial> material)
 {
     _material = material;
-    if (_material.is_valid())
-    {
+    if (_material.is_valid()) {
         _material->set_shader_parameter("TEXTURE", _cubemap);
         if (get_surface_count() > 0) {
             surface_set_material(0, _material);
@@ -161,7 +159,7 @@ void Trile::set_material(Ref<ShaderMaterial> material)
 
 void Trile::_initialize_data_buffer()
 {
-    _buffer = {false};
+    _buffer = { false };
     _buffer.resize(_trixels_count);
 }
 
@@ -187,7 +185,7 @@ void Trile::_initialize_cubemap()
 
 void Trile::rebuild_mesh()
 {
-    if(_should_dematerialize){
+    if (_should_dematerialize) {
         TrileDematerializer(this).dematerialize();
     }
     TrileMaterializer(this).materialize();
@@ -199,7 +197,9 @@ void Trile::set_raw_mesh(const Array mesh_data)
     clear_surfaces();
 
     auto vertices = (PackedVector3Array)mesh_data[Mesh::ARRAY_VERTEX];
-    if (vertices.size() == 0) return;
+    if (vertices.size() == 0) {
+        return;
+    }
 
     add_surface_from_arrays(PRIMITIVE_TRIANGLES, mesh_data);
     if (_material.is_valid()) {
@@ -216,22 +216,21 @@ int Trile::get_trixel_width_along_axis(const Vector3i axis)
 
 bool Trile::contains_trixel_pos(const Vector3i pos)
 {
-    return 
-        pos.x >= 0 && pos.x < _trixel_bounds.x &&
-        pos.y >= 0 && pos.y < _trixel_bounds.y &&
-        pos.z >= 0 && pos.z < _trixel_bounds.z;
+    return pos.x >= 0 && pos.x < _trixel_bounds.x &&
+            pos.y >= 0 && pos.y < _trixel_bounds.y &&
+            pos.z >= 0 && pos.z < _trixel_bounds.z;
 }
 
 int Trile::trixel_index_from_position(const Vector3i pos)
 {
-    return pos.x *_x_index + pos.y *_y_index + pos.z *_z_index;
+    return pos.x * _x_index + pos.y * _y_index + pos.z * _z_index;
 }
 
 bool Trile::get_trixel(const Vector3i pos)
 {
-    if(!contains_trixel_pos(pos)){
+    if (!contains_trixel_pos(pos)) {
         return false;
-    }else{
+    } else {
         return _buffer[trixel_index_from_position(pos)];
     }
 }
@@ -248,14 +247,14 @@ bool Trile::is_trixel_face_solid(const Vector3i pos, const Trile::Face face)
 
 void Trile::set_trixel(const Vector3i pos, const bool state)
 {
-    if(contains_trixel_pos(pos)){
+    if (contains_trixel_pos(pos)) {
         _buffer[trixel_index_from_position(pos)] = state;
     }
 }
 
 void Trile::set_trixels(const TypedArray<Vector3i> positions, const bool state)
 {
-    for(int i = 0; i < positions.size(); i++){
+    for (int i = 0; i < positions.size(); i++) {
         set_trixel(positions[i], state);
     }
 }
@@ -270,9 +269,9 @@ void Trile::fill_trixels(const Vector3i start_corner, const Vector3i end_corner,
     int end_y = MIN(MAX(start_corner.y, end_corner.y), _trixel_bounds.y - 1);
     int end_z = MIN(MAX(start_corner.z, end_corner.z), _trixel_bounds.z - 1);
 
-    for(int x = start_x; x <= end_x; x++){
-        for(int y = start_y; y <= end_y; y++){
-            for(int z = start_z; z <= end_z; z++){
+    for (int x = start_x; x <= end_x; x++) {
+        for (int y = start_y; y <= end_y; y++) {
+            for (int z = start_z; z <= end_z; z++) {
                 set_trixel(Vector3i(x, y, z), state);
             }
         }
@@ -346,7 +345,7 @@ Vector3i Trile::get_face_cotangent_abs(const Trile::Face face)
 Trile::Face Trile::face_from_normal(const Vector3i normal)
 {
     static const Face face_lookup[] = {
-        BACK, 
+        BACK,
         BOTTOM,
         LEFT,
         (Face)0,
@@ -355,7 +354,7 @@ Trile::Face Trile::face_from_normal(const Vector3i normal)
         FRONT,
     };
     auto face_index = normal.x + normal.y * 2 + normal.z * 3 + 3;
-    if(face_index >= 0 && face_index <= 6){
+    if (face_index >= 0 && face_index <= 6) {
         return face_lookup[face_index];
     }
     return TOP;
@@ -363,7 +362,7 @@ Trile::Face Trile::face_from_normal(const Vector3i normal)
 
 String Trile::get_face_name(const Face face)
 {
-    static const String face_names[] = { "Front", "Back", "Top", "bottom", "Left", "Right"};
+    static const String face_names[] = { "Front", "Back", "Top", "bottom", "Left", "Right" };
     return face_names[face];
 }
 

@@ -6,13 +6,12 @@ using namespace godot;
 TrileDematerializer::TrileDematerializer(Ref<Trile> trile)
 {
     _trile = trile;
-    _sandwich_data = {NONE};
+    _sandwich_data = { NONE };
     _sandwich_data.resize(_trile->get_trixels_count());
 }
 
 TrileDematerializer::~TrileDematerializer()
 {
-
 }
 
 void TrileDematerializer::dematerialize()
@@ -30,11 +29,12 @@ void TrileDematerializer::_populate_sandwich_data()
 
     auto trile_offset = _trile->get_size() * 0.5f;
 
-    for (int i = 0; i < mesh_vertices.size(); i += 3)
-    {
+    for (int i = 0; i < mesh_vertices.size(); i += 3) {
         auto x_normal = SIGN(mesh_normals[i].x + mesh_normals[i + 1].x + mesh_normals[i + 2].x);
         x_normal = (x_normal > 0.0f) ? 1.0f : (x_normal < 0.0f ? -1.0f : 0.0f);
-        if(x_normal == 0.0f) continue;
+        if (x_normal == 0.0f) {
+            continue;
+        }
 
         auto v1 = (mesh_vertices[i + 0] + trile_offset) * _trile->get_resolution();
         auto v2 = (mesh_vertices[i + 1] + trile_offset) * _trile->get_resolution();
@@ -42,7 +42,9 @@ void TrileDematerializer::_populate_sandwich_data()
 
         auto plane_normal = (v2 - v1).normalized().cross((v3 - v1).normalized()).normalized();
         auto plane_d = plane_normal.dot(v1);
-        if(plane_normal.x == 0.0f) continue;
+        if (plane_normal.x == 0.0f) {
+            continue;
+        }
 
         auto pv1 = Vector2(v1.y, v1.z);
         auto pv2 = Vector2(v2.y, v2.z);
@@ -67,46 +69,63 @@ void TrileDematerializer::_populate_sandwich_data()
         auto min_y = CLAMP(floorf(MIN(MIN(pv1.y, pv2.y), pv3.y)), 0, _trile->get_trixels_count() - 1);
         auto max_x = CLAMP(ceilf(MAX(MAX(pv1.x, pv2.x), pv3.x)), 0, _trile->get_z_index() - 1);
         auto max_y = CLAMP(ceilf(MAX(MAX(pv1.y, pv2.y), pv3.y)), 0, _trile->get_trixels_count() - 1);
-    
-        for(int x=min_x;x<max_x;x++) for(int y=min_y;y<max_y;y++){
-            auto point = Vector2(x + 0.5, y + 0.5);
 
-            // check if point is within the triangle
-            if(s1 != SIGN(d1 - line1.dot(point))) continue;
-            if(s2 != SIGN(d2 - line2.dot(point))) continue;
-            if(s3 != SIGN(d3 - line3.dot(point))) continue;
+        for (int x = min_x; x < max_x; x++) {
+            for (int y = min_y; y < max_y; y++) {
+                auto point = Vector2(x + 0.5, y + 0.5);
 
-            // within triangle - calculate depth from plane formula
-            auto depth = roundf((plane_d - point.x * plane_normal.y - point.y * plane_normal.z) / plane_normal.x);
-            if(depth >= _trile->get_y_index()) continue;
+                // check if point is within the triangle
+                if (s1 != SIGN(d1 - line1.dot(point))) {
+                    continue;
+                }
+                if (s2 != SIGN(d2 - line2.dot(point))) {
+                    continue;
+                }
+                if (s3 != SIGN(d3 - line3.dot(point))) {
+                    continue;
+                }
 
-            depth = CLAMP(depth, 0, _trile->get_y_index() - 1);
+                // within triangle - calculate depth from plane formula
+                auto depth = roundf((plane_d - point.x * plane_normal.y - point.y * plane_normal.z) / plane_normal.x);
+                if (depth >= _trile->get_y_index()) {
+                    continue;
+                }
 
-            int index = depth + x * _trile->get_y_index() + y * _trile->get_z_index();
-            auto curr_state = _sandwich_data[index];
-            SandwichState new_state = plane_normal.x > 0.0 ? ENTRY : EXIT;
-            if (curr_state != 0 && curr_state != new_state) new_state = BOTH;
-            _sandwich_data[index] = new_state;
+                depth = CLAMP(depth, 0, _trile->get_y_index() - 1);
+
+                int index = depth + x * _trile->get_y_index() + y * _trile->get_z_index();
+                auto curr_state = _sandwich_data[index];
+                SandwichState new_state = plane_normal.x > 0.0 ? ENTRY : EXIT;
+                if (curr_state != 0 && curr_state != new_state) {
+                    new_state = BOTH;
+                }
+                _sandwich_data[index] = new_state;
+            }
         }
     }
 }
 
 void TrileDematerializer::_rasterize_trile_mesh()
 {
-    auto& buffer = _trile->get_raw_trixel_buffer();
+    auto &buffer = _trile->get_raw_trixel_buffer();
 
     SandwichState state;
-    for (int i = 0; i< _trile->get_trixels_count(); i++)
-    {
-        if (i % _trile->get_y_index() == 0 || state == EXIT){
+    for (int i = 0; i < _trile->get_trixels_count(); i++) {
+        if (i % _trile->get_y_index() == 0 || state == EXIT) {
             state = NONE;
         }
-        if(_sandwich_data[i] == ENTRY) state = ENTRY;
-        if(_sandwich_data[i] == EXIT) state = NONE;
-        if(_sandwich_data[i] == BOTH) state = EXIT;
+        if (_sandwich_data[i] == ENTRY) {
+            state = ENTRY;
+        }
+        if (_sandwich_data[i] == EXIT) {
+            state = NONE;
+        }
+        if (_sandwich_data[i] == BOTH) {
+            state = EXIT;
+        }
 
-        if(state != NONE) buffer[i] = true;
+        if (state != NONE) {
+            buffer[i] = true;
+        }
     }
 }
-
-

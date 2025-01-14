@@ -12,7 +12,6 @@ TrileMaterializer::TrileMaterializer(Ref<Trile> trile)
 
 TrileMaterializer::~TrileMaterializer()
 {
-
 }
 
 void TrileMaterializer::materialize()
@@ -26,14 +25,14 @@ Array TrileMaterializer::_create_materialized_mesh()
     std::vector<Vector3> mesh_vertices = {};
     std::vector<Vector2> mesh_uvs = {};
 
-    for (int i = 0; i < 6; i++){
+    for (int i = 0; i < 6; i++) {
         auto face = (Trile::Face)i;
         auto layer_dir = Trile::get_face_normal_abs(face);
         auto layer_dir_depth = _trile->get_trixel_width_along_axis(layer_dir);
 
-        for (int layer = 0; layer < layer_dir_depth; layer++){
+        for (int layer = 0; layer < layer_dir_depth; layer++) {
             auto planes = _find_planes_in_layer(face, layer);
-            for(const auto& plane : planes){
+            for (const auto &plane : planes) {
                 _add_plane_to_mesh(plane, mesh_vertices, mesh_uvs);
             }
         }
@@ -42,10 +41,10 @@ Array TrileMaterializer::_create_materialized_mesh()
     auto mesh_vertices_array = PackedVector3Array();
     auto mesh_uvs_array = PackedVector2Array();
 
-    for(const auto& vertex : mesh_vertices){
+    for (const auto &vertex : mesh_vertices) {
         mesh_vertices_array.push_back(vertex);
     }
-    for(const auto& uv : mesh_uvs){
+    for (const auto &uv : mesh_uvs) {
         mesh_uvs_array.push_back(uv);
     }
 
@@ -83,10 +82,8 @@ std::list<TrileMaterializer::TrixelPlane> TrileMaterializer::_find_planes_in_lay
 
     auto plane_map = std::vector<bool>(layer_size_x * layer_size_y, false);
 
-    for (int x = 0; x < layer_size_x; x++)
-    {
-        for (int y = 0; y < layer_size_y; y++)
-        {
+    for (int x = 0; x < layer_size_x; x++) {
+        for (int y = 0; y < layer_size_y; y++) {
             auto trixel_index = x * x_index + y * y_index + z_offset;
             auto top_trixel_index = x * x_index + y * y_index + z_top_offset;
 
@@ -98,9 +95,9 @@ std::list<TrileMaterializer::TrixelPlane> TrileMaterializer::_find_planes_in_lay
     auto layer_planes = _greedy_mesh_planes_in_layer(plane_map, layer_size_x, layer_size_y);
 
     auto trixel_planes = std::list<TrileMaterializer::TrixelPlane>();
-    for (const auto& plane : layer_planes) {
+    for (const auto &plane : layer_planes) {
         auto pos = dir_x * plane.pos.x + dir_y * plane.pos.y + dir_z * abs_depth;
-        trixel_planes.push_back({pos, plane.size, face});
+        trixel_planes.push_back({ pos, plane.size, face });
     }
 
     return trixel_planes;
@@ -110,34 +107,37 @@ std::list<TrileMaterializer::LayerPlane> TrileMaterializer::_greedy_mesh_planes_
 {
     std::list<TrileMaterializer::LayerPlane> planes;
 
-    for (int x = 0; x < width; x++)
-    {
-        for (int y = 0; y < height; y++)
-        {
-            if (!layer_map[x + y * width]) continue;
+    for (int x = 0; x < width; x++) {
+        for (int y = 0; y < height; y++) {
+            if (!layer_map[x + y * width]) {
+                continue;
+            }
             layer_map[x + y * width] = false;
 
             auto plane_size = Vector2i(1, 1);
 
-            while (x + plane_size.x < width)
-            {
+            while (x + plane_size.x < width) {
                 auto face_index = x + plane_size.x + y * width;
-                if (!layer_map[face_index]) break;
+                if (!layer_map[face_index]) {
+                    break;
+                }
                 layer_map[face_index] = false;
                 plane_size.x++;
             }
 
-            while (y + plane_size.y < height)
-            {
+            while (y + plane_size.y < height) {
                 int line_width = 0;
-                while (line_width < plane_size.x)
-                {
+                while (line_width < plane_size.x) {
                     auto face_index = x + line_width + (y + plane_size.y) * width;
-                    if (!layer_map[face_index]) break;
+                    if (!layer_map[face_index]) {
+                        break;
+                    }
                     line_width++;
                 }
 
-                if (line_width != plane_size.x) break;
+                if (line_width != plane_size.x) {
+                    break;
+                }
                 for (int dX = 0; dX < plane_size.x; dX++) {
                     auto face_index = x + dX + (y + plane_size.y) * width;
                     layer_map[face_index] = false;
@@ -152,7 +152,7 @@ std::list<TrileMaterializer::LayerPlane> TrileMaterializer::_greedy_mesh_planes_
     return planes;
 }
 
-void TrileMaterializer::_add_plane_to_mesh(const TrileMaterializer::TrixelPlane plane, std::vector<Vector3>& mesh_vertices, std::vector<Vector2>& mesh_uvs)
+void TrileMaterializer::_add_plane_to_mesh(const TrileMaterializer::TrixelPlane plane, std::vector<Vector3> &mesh_vertices, std::vector<Vector2> &mesh_uvs)
 {
     auto face_normal = Trile::get_face_normal(plane.face);
     auto dir_x = Trile::get_face_tangent(plane.face);
@@ -175,18 +175,18 @@ void TrileMaterializer::_add_plane_to_mesh(const TrileMaterializer::TrixelPlane 
     };
 
     std::vector<Vector2> uvs;
-    for (int i = 0; i < 4;i++) {
+    for (int i = 0; i < 4; i++) {
         uvs.push_back(_trile->get_cubemap()->trile_coords_to_uv(face_vertices[i], plane.face));
     }
 
     // this check is a result of using abs on tangent vectors
-    const int indices_clockwise[] = {2, 1, 0, 0, 3, 2};
-    const int indices_counter_clockwise[] = {0, 1, 2, 2, 3, 0};
+    const int indices_clockwise[] = { 2, 1, 0, 0, 3, 2 };
+    const int indices_counter_clockwise[] = { 0, 1, 2, 2, 3, 0 };
 
     auto use_clockwise = face_normal.x < 0 || face_normal.y < 0 || face_normal.z < 0;
     auto indices = use_clockwise ? indices_clockwise : indices_counter_clockwise;
 
-    for(int i = 0; i < 6; i++) {
+    for (int i = 0; i < 6; i++) {
         mesh_vertices.push_back(face_vertices[indices[i]]);
         mesh_uvs.push_back(uvs[indices[i]]);
     }
