@@ -27,6 +27,7 @@ public:
 private:
     void _generate_image();
     void _fill_trixel_face(const Vector3i position, const Trile::Face face, const Color color);
+    bool _is_texture_coords_valid(const Vector2i coords);
 
 public:
     void apply_external_image(Ref<Image> img);

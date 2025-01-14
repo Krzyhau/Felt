@@ -10,7 +10,7 @@ void TrileCubemap::_bind_methods()
     ClassDB::bind_method(D_METHOD("apply_external_image", "image"), &TrileCubemap::apply_external_image);
 
     ClassDB::bind_method(D_METHOD("paint", "position", "face", "color"), &TrileCubemap::paint);
-    ClassDB::bind_method(D_METHOD("flood_fill", "position", "face", "color"), &TrileCubemap::paint);
+    ClassDB::bind_method(D_METHOD("flood_fill", "position", "face", "color"), &TrileCubemap::flood_fill);
     ClassDB::bind_method(D_METHOD("pick_color", "position", "face"), &TrileCubemap::pick_color);
 
     ClassDB::bind_method(D_METHOD("trixel_coords_to_texture_coords", "coords", "face"), &TrileCubemap::trixel_coords_to_texture_coords);
@@ -55,7 +55,7 @@ void TrileCubemap::_generate_image()
 void TrileCubemap::_fill_trixel_face(const Vector3i position, const Trile::Face face, const Color color)
 {
     auto pixel_pos = trixel_coords_to_texture_coords(position, face);
-    if (_buffer_image->get_pixelv(pixel_pos) == color) {
+    if (!_is_texture_coords_valid(pixel_pos) || _buffer_image->get_pixelv(pixel_pos) == color) {
         return;
     }
 
@@ -69,9 +69,18 @@ void TrileCubemap::_fill_trixel_face(const Vector3i position, const Trile::Face 
 
     for (int x = pixel_pos.x; x != pixel_endpos.x; x += pixel_dir.x) {
         for (int y = pixel_pos.y; y != pixel_endpos.y; y += pixel_dir.y) {
-            _buffer_image->set_pixel(x, y, color);
+            Vector2i subpixel_pos(x, y);
+            if (_is_texture_coords_valid(subpixel_pos)) {
+                _buffer_image->set_pixelv(subpixel_pos, color);
+            }
         }
     }
+}
+
+bool TrileCubemap::_is_texture_coords_valid(const Vector2i coords)
+{
+    return coords.x >= 0 && coords.x < _buffer_image->get_width() &&
+            coords.y >= 0 && coords.y < _buffer_image->get_height();
 }
 
 void TrileCubemap::apply_external_image(Ref<Image> img)
@@ -96,6 +105,7 @@ void TrileCubemap::flood_fill(const Vector3i position, const Trile::Face face, c
 
     std::set<Vector3i> triles_to_fill;
     std::set<Vector3i> propagation_triles;
+    std::set<Vector3i> new_propagation_triles;
 
     auto tangent_vector = Trile::get_face_tangent(face);
     auto cotangent_vector = Trile::get_face_cotangent(face);
@@ -105,11 +115,7 @@ void TrileCubemap::flood_fill(const Vector3i position, const Trile::Face face, c
     while (!propagation_triles.empty()) {
         for (auto pos : propagation_triles) {
             triles_to_fill.insert(pos);
-        }
 
-        std::set<Vector3i> new_propagation_triles;
-
-        for (auto pos : propagation_triles) {
             std::set<Vector3i> neighbours = {
                 pos + tangent_vector,
                 pos - tangent_vector,
@@ -118,16 +124,19 @@ void TrileCubemap::flood_fill(const Vector3i position, const Trile::Face face, c
             };
 
             for (auto newpos : neighbours) {
-                if (
-                        triles_to_fill.find(newpos) == triles_to_fill.end() &&
-                        new_propagation_triles.find(newpos) == new_propagation_triles.end() &&
-                        _trile->is_trixel_face_solid(newpos, face) &&
-                        pick_color(newpos, face) == existing_color) {
+                bool not_filled_yet = triles_to_fill.find(newpos) == triles_to_fill.end();
+                bool not_propagated_yet = new_propagation_triles.find(newpos) == new_propagation_triles.end();
+                bool is_solid = _trile->is_trixel_face_solid(newpos, face);
+                bool is_same_color = pick_color(newpos, face) == existing_color;
+
+                if (not_filled_yet && not_propagated_yet && is_solid && is_same_color) {
                     new_propagation_triles.insert(newpos);
                 }
             }
         }
+
         propagation_triles = new_propagation_triles;
+        new_propagation_triles.clear();
     }
 
     for (auto pos : triles_to_fill) {
@@ -139,6 +148,9 @@ void TrileCubemap::flood_fill(const Vector3i position, const Trile::Face face, c
 Color TrileCubemap::pick_color(const Vector3i position, const Trile::Face face)
 {
     auto pixel_pos = trixel_coords_to_texture_coords(position, face);
+    if (!_is_texture_coords_valid(pixel_pos)) {
+        return Color();
+    }
     return _buffer_image->get_pixelv(pixel_pos);
 }
 
