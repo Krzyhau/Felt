@@ -64,12 +64,21 @@ func _on_emmission_changed(new_value : float):
 		_active_button.emission = new_value as int
 
 func _push_recent_color():
-	var recent_count = color_buttons.get_child_count()
-	for i in range(recent_count-1, 0, -1):
+	var color_to_add := color_picker.color
+	color_to_add.a8 = emission_value.value as int
+	
+	var recent_count := color_buttons.get_child_count()
+	var shift_index := 0
+	
+	for i in range(recent_count-1):
+		var button := color_buttons.get_child(i) as ColorButton
+		if button.color == color_to_add: break
+		else: shift_index += 1
+		
+	for i in range(shift_index, 0, -1):
 		var current_button := color_buttons.get_child(i) as ColorButton
 		var previous_button := color_buttons.get_child(i-1) as ColorButton
-		
 		current_button.color = previous_button.color
+	
 	var first := color_buttons.get_child(0) as ColorButton
-	first.base_color = color_picker.color
-	first.emission = emission_value.value as int
+	first.color = color_to_add
