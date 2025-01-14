@@ -406,12 +406,10 @@ text = "Edit"
 switch_on_hover = true
 item_count = 4
 popup/item_0/text = "Undo"
-popup/item_0/id = 0
 popup/item_0/disabled = true
 popup/item_1/text = "Redo"
 popup/item_1/id = 1
 popup/item_1/disabled = true
-popup/item_2/text = ""
 popup/item_2/id = 2
 popup/item_2/separator = true
 popup/item_3/text = "Resize"
@@ -490,7 +488,7 @@ horizontal_alignment = 1
 
 [node name="open_file_dialog" type="FileDialog" parent="windows"]
 title = "Open a File"
-ok_button_text = "Otwórz"
+ok_button_text = "Open"
 file_mode = 0
 access = 2
 filters = PackedStringArray("*.fezao.json, *.fezts.json; Converted Trixel Art Formats")
